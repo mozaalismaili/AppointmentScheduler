@@ -12,4 +12,10 @@ public class SavingsAccount extends BankAccount{
         balance += interest;
         System.out.println("Interest applied:" + interest + ". New Balance:" + balance);
     }
+    @Override
+    public void showAccountInfo() {
+        super.showAccountInfo();
+        System.out.println("Interest Rate: " + interestRate + "%");
+    }
+
 }
