@@ -1,6 +1,9 @@
 public class BankSystem {
     public static void main(String[] args){
-
+        BankAccount acount1 = new BankAccount("Reem", "11111111", 2000.0);
+        BankAccount acount2 = new BankAccount("Sara", "22222222", 1200.0);
+        acount1.showAccountInfo();
+        acount2.showAccountInfo();
 
 
     }
