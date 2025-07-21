@@ -15,6 +15,7 @@ public class BankAccount {
     }
     public void Desposit(double amount){
         balance += amount;
+        System.out.println("Your account balance:"+" "+balance);
     }
     public void Withdraw(double amount){
        if (amount>balance){
