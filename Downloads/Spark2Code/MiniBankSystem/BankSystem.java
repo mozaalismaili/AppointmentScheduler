@@ -4,6 +4,8 @@ public class BankSystem {
         BankAccount acount2 = new BankAccount("Sara", "22222222", 1200.0);
         acount1.showAccountInfo();
         acount2.showAccountInfo();
+        DisplayMenu();
+
 
 
     }

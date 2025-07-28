@@ -5,6 +5,7 @@ public class SavingsAccount extends BankAccount{
     public SavingsAccount(String accountName, String accountNumber, double balance, double interestRate) {
         super(accountName, accountNumber, balance);
         this.interestRate = interestRate;
+
     }
 
     public void applyInterest() {
