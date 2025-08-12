@@ -1,7 +1,8 @@
 # AppointmentScheduler
 Web application that allows customers to book, cancel, and view appointments with a service provider.
 
-##Repository Structure (after Week 1)
+## Repository Structure (after Week 1)
+```
 appointment-scheduler/
 │
 ├── backend/
@@ -39,21 +40,21 @@ appointment-scheduler/
 ├── postman_collection.json          # For API testing
 ├── README.md                        # Project setup + usage
 └── .gitignore
+```
 
+## Expected Functionality by End of Week 1
 
-##Expected Functionality by End of Week 1
+### Backend
+- Working Auth API with signup/login (roles: Customer, Provider).
+- Availability API to set and fetch provider’s available slots.
+- Database tables & JPA entities (users, availability, appointments) created.
 
-###Backend
-Working Auth API with signup/login (roles: Customer, Provider).
-Availability API to set and fetch provider’s available slots.
-Database tables & JPA entities (users, availability, appointments) created.
+### Frontend
+- Login page (works with backend).
+- Availability form (UI + connected to API).
+- Basic booking page UI (slots displayed, booking form functional).
 
-###Frontend
-Login page (works with backend).
-Availability form (UI + connected to API).
-Basic booking page UI (slots displayed, booking form functional).
-
-###QA/Docs
-Postman collection for Auth & Availability.
-Test case document for Week 1 features.
-README explaining setup & run instructions.
+### QA/Docs
+- Postman collection for Auth & Availability.
+- Test case document for Week 1 features.
+- README explaining setup & run instructions.
