@@ -1,0 +1,67 @@
+.availability-container {
+  max-width: 900px;
+  margin: 40px auto;
+  padding: 30px;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  font-family: Arial, sans-serif;
+}
+
+.availability-container h2 {
+  margin-bottom: 24px;
+  text-align: center;
+  color: #333;
+}
+
+.availability-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.days-checkboxes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.form-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.form-row > div {
+  flex: 1;
+}
+
+.availability-form label {
+  font-weight: bold;
+  margin-bottom: 6px;
+  display: block;
+}
+
+.availability-form input,
+.availability-form select {
+  width: 100%;
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+}
+
+.availability-form button {
+  width: 100%;
+  padding: 12px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.availability-form button:hover {
+  background-color: #0056b3;
+}
