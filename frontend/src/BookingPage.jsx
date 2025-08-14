@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -58,13 +58,75 @@ function newIdempotencyKey() {
   return (Date.now().toString(36) + Math.random().toString(36).slice(2, 10)).toUpperCase();
 }
 
+/** Local slot generator (fallback if /api/availability is missing) */
+function generateSlots(dateStr, start = "09:00", end = "17:00", stepMin = 30) {
+  const [sh, sm] = start.split(":").map(Number);
+  const [eh, em] = end.split(":").map(Number);
+  const startMin = sh * 60 + sm;
+  const endMin = eh * 60 + em;
+  const all = [];
+  for (let t = startMin; t < endMin; t += stepMin) {
+    const h = String(Math.floor(t / 60)).padStart(2, "0");
+    const m = String(t % 60).padStart(2, "0");
+    all.push(`${h}:${m}`);
+  }
+  return all;
+}
+
+/** Normalize various availability API shapes to a boolean map */
+function normalizeAvailability(dateStr, data) {
+  // Supported shapes:
+  // { slots: ["09:00","09:30"], booked: ["10:00"] }
+  // { available: ["09:00"], unavailable: ["10:00"] }
+  // { times: [{time:"09:00", available:true}, ...] }
+  const set = new Set();
+  let all = [];
+
+  if (Array.isArray(data?.slots)) {
+    all = data.slots;
+    (data.booked || data.unavailable || []).forEach(t => set.add(t));
+  } else if (Array.isArray(data?.available) || Array.isArray(data?.unavailable)) {
+    all = (data.available || []).concat(data.unavailable || []);
+    (data.unavailable || []).forEach(t => set.add(t));
+  } else if (Array.isArray(data?.times)) {
+    all = data.times.map(x => x.time);
+    data.times.forEach(x => { if (!x.available) set.add(x.time); });
+  }
+
+  // Fallback if API didn't give any slots
+  if (all.length === 0) all = generateSlots(dateStr);
+
+  // Build map
+  const map = {};
+  all.forEach(t => {
+    const past = isPastDateTime(dateStr, t);
+    map[t] = !(set.has(t) || past);
+  });
+  return map;
+}
+
 // --- Component ---
-export default function BookingPage({ services = ["Consultation", "Follow-up", "Support"], apiBaseUrl }) {
+export default function BookingPage({
+  services = ["Consultation", "Follow-up", "Support"],
+  apiBaseUrl
+}) {
   const minDate = toLocalMinDateStr();
   const resolvedApi = useMemo(() => getApiBaseUrl(apiBaseUrl), [apiBaseUrl]);
   const [banner, setBanner] = useState({ kind: "success", text: "" });
 
-  const { register, handleSubmit, watch, reset, formState: { errors, isSubmitting } } = useForm({
+  // availability state
+  const [slots, setSlots] = useState([]);                 // [{time:"09:00", available:true}, ...]
+  const [loadingSlots, setLoadingSlots] = useState(false);
+  const [selectedTime, setSelectedTime] = useState("");
+
+  const {
+    register,
+    handleSubmit,
+    watch,
+    reset,
+    setValue,
+    formState: { errors, isSubmitting }
+  } = useForm({
     resolver: zodResolver(BookingSchema),
     defaultValues: { service: "", date: "", time: "", name: "", phone: "", notes: "", company: "" },
     mode: "onBlur",
@@ -72,6 +134,47 @@ export default function BookingPage({ services = ["Consultation", "Follow-up", "
 
   const dateVal = watch("date");
   const todaySelected = dateVal === minDate;
+
+  // Load availability when date changes
+  useEffect(() => {
+    if (!dateVal) {
+      setSlots([]);
+      setSelectedTime("");
+      setValue("time", "");
+      return;
+    }
+    setSelectedTime("");
+    setValue("time", "");
+    setLoadingSlots(true);
+
+    (async () => {
+      try {
+        // Try the real backend:
+        const r = await fetch(`${resolvedApi}/availability?date=${dateVal}`);
+        if (r.ok) {
+          const data = await r.json();
+          const map = normalizeAvailability(dateVal, data);
+          const arr = Object.keys(map).sort().map(t => ({ time: t, available: map[t] }));
+          setSlots(arr);
+        } else {
+          // Fallback: local generator
+          const arr = generateSlots(dateVal).map(t => ({ time: t, available: !isPastDateTime(dateVal, t) }));
+          setSlots(arr);
+        }
+      } catch {
+        // No backend reachable → fallback local
+        const arr = generateSlots(dateVal).map(t => ({ time: t, available: !isPastDateTime(dateVal, t) }));
+        setSlots(arr);
+      } finally {
+        setLoadingSlots(false);
+      }
+    })();
+  }, [dateVal, resolvedApi, setValue]);
+
+  function chooseSlot(t) {
+    setSelectedTime(t);
+    setValue("time", t, { shouldValidate: true });
+  }
 
   async function onSubmit(values) {
     setBanner({ kind: "success", text: "" });
@@ -89,14 +192,21 @@ export default function BookingPage({ services = ["Consultation", "Follow-up", "
     }
 
     const payload = {
-      service: values.service, date: values.date, time: values.time,
-      name: values.name, phone: values.phone, notes: values.notes || undefined,
+      service: values.service,
+      date: values.date,
+      time: values.time,
+      name: values.name,
+      phone: values.phone,
+      notes: values.notes || undefined,
     };
 
     try {
       const idKey = newIdempotencyKey();
       const data = await createBooking(resolvedApi, payload, idKey);
-      reset();
+      // block the slot in the current view
+      setSlots(prev => prev.map(s => s.time === values.time ? { ...s, available: false } : s));
+      setSelectedTime("");
+      reset({ service: values.service, date: values.date, time: "", name: "", phone: "", notes: "", company: "" });
       setBanner({ kind: "success", text: data?.message || "✅ Booking created! We’ll contact you soon." });
     } catch (err) {
       setBanner({ kind: "error", text: err.message || "Could not submit. Try again." });
@@ -111,7 +221,7 @@ export default function BookingPage({ services = ["Consultation", "Follow-up", "
       <main className="bp-shell" aria-live="polite">
         <header className="bp-header">
           <h1>Book an Appointment</h1>
-          <p>Pick a service, choose a time, and tell us how to reach you.</p>
+          <p>Pick a service, choose a date, select an available time slot, and tell us how to reach you.</p>
         </header>
 
         {banner.text && (
@@ -136,33 +246,47 @@ export default function BookingPage({ services = ["Consultation", "Follow-up", "
               {errors.service && <p className="bp-error">{errors.service.message}</p>}
             </div>
 
-            {/* Date & Time */}
-            <div className="bp-row">
-              <div className="bp-field">
-                <label htmlFor="date" className="bp-label">
-                  <span className="bp-ico" aria-hidden>📅</span> Date
-                </label>
-                <input id="date" type="date" min={minDate} className="bp-input" {...register("date")} aria-invalid={!!errors.date} />
-                {errors.date && <p className="bp-error">{errors.date.message}</p>}
-              </div>
-
-              <div className="bp-field">
-                <label htmlFor="time" className="bp-label">
-                  <span className="bp-ico" aria-hidden>⏰</span> Time
-                </label>
-                <input
-                  id="time"
-                  type="time"
-                  step={1800}
-                  className="bp-input"
-                  {...register("time")}
-                  aria-invalid={!!errors.time}
-                  min={todaySelected ? new Date().toTimeString().slice(0,5) : undefined}
-                />
-                {errors.time && <p className="bp-error">{errors.time.message}</p>}
-                <p className="bp-hint">We book in 30-minute slots.</p>
-              </div>
+            {/* Date */}
+            <div className="bp-field">
+              <label htmlFor="date" className="bp-label">
+                <span className="bp-ico" aria-hidden>📅</span> Date
+              </label>
+              <input id="date" type="date" min={minDate} className="bp-input" {...register("date")} aria-invalid={!!errors.date} />
+              {errors.date && <p className="bp-error">{errors.date.message}</p>}
             </div>
+
+            {/* Time slots (appears after choosing a date) */}
+            {dateVal && (
+              <div className="bp-field">
+                <label className="bp-label">
+                  <span className="bp-ico" aria-hidden>⏰</span> Time (30-minute slots)
+                </label>
+
+                {loadingSlots ? (
+                  <p className="bp-hint">Loading available slots…</p>
+                ) : (
+                  <div className="bp-slots" role="listbox" aria-label="Available time slots">
+                    {slots.map(({ time, available }) => (
+                      <button
+                        key={time}
+                        type="button"
+                        className={`bp-slot ${selectedTime === time ? "bp-slot--selected" : ""}`}
+                        disabled={!available}
+                        aria-pressed={selectedTime === time}
+                        onClick={() => chooseSlot(time)}
+                      >
+                        {time}
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                {/* keep the real form field, but hidden (slot picker writes to it) */}
+                <input type="hidden" {...register("time")} value={selectedTime} readOnly />
+                {errors.time && <p className="bp-error">{errors.time.message}</p>}
+                <p className="bp-hint">Unavailable and past-time slots are disabled automatically.</p>
+              </div>
+            )}
 
             {/* Contact */}
             <div className="bp-row">
