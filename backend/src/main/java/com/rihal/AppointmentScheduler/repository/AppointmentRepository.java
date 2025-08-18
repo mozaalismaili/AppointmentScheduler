@@ -26,4 +26,9 @@ public interface AppointmentRepository extends JpaRepository<Appointment, UUID> 
                           @Param("newStart") LocalTime newStart,
                           @Param("newEnd") LocalTime newEnd,
                           @Param("appointmentId") UUID appointmentId);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT a FROM Appointment a WHERE a.provider.id = :providerId AND a.date = :date")
+    List<Appointment> findForUpdate(@Param("providerId") UUID providerId, @Param("date") LocalDate date);
+
 }
