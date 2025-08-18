@@ -46,5 +46,18 @@ public class BookingController {
         bookingService.cancel(id);
         return Map.of("status", "CANCELLED");
     }
+
+    @PutMapping("/{id}/reschedule")
+    public ResponseEntity<?> rescheduleAppointment(@PathVariable UUID id,
+                                               @RequestBody RescheduleRequest request,
+                                               Authentication auth) {
+    UUID userId = UUID.fromString(auth.getName()); // depends on your JWT setup
+    boolean isProviderOrAdmin = auth.getAuthorities().stream()
+            .anyMatch(a -> a.getAuthority().equals("ROLE_PROVIDER") || a.getAuthority().equals("ROLE_ADMIN"));
+
+    Appointment updated = bookingService.rescheduleAppointment(id, userId, isProviderOrAdmin, request);
+    return ResponseEntity.ok(updated);
+}
+
 }
 
