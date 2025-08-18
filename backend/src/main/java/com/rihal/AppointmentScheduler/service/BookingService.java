@@ -47,4 +47,35 @@ public class BookingService {
         }
         return appt;
     }
+
+    /** reschedule appointment. */
+    public Appointment rescheduleAppointment(UUID appointmentId, UUID requesterId, boolean isProviderOrAdmin, RescheduleRequest req) {
+    Appointment appointment = appointmentRepository.findById(appointmentId)
+            .orElseThrow(() -> new RuntimeException("Appointment not found"));
+
+    // Check authorization
+    if (!appointment.getCustomer().getId().equals(requesterId) && !isProviderOrAdmin) {
+        throw new RuntimeException("Unauthorized reschedule attempt");
+    }
+
+    // Check overlap
+    boolean overlap = appointmentRepository.existsOverlap(
+            appointment.getProvider().getId(),
+            req.getNewDate(),
+            req.getNewStartTime(),
+            req.getNewEndTime(),
+            appointment.getId()
+    );
+    if (overlap) {
+        throw new RuntimeException("Selected slot is already booked");
+    }
+
+    // Apply new values
+    appointment.setDate(req.getNewDate());
+    appointment.setStartTime(req.getNewStartTime());
+    appointment.setEndTime(req.getNewEndTime());
+
+    return appointmentRepository.save(appointment);
+}
+
 }
