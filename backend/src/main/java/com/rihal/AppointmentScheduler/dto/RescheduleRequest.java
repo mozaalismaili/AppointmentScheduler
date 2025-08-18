@@ -1,4 +1,4 @@
-package com.project.dto;
+package com.rihal.AppointmentScheduler.dto;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
