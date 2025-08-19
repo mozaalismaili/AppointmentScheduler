@@ -1,3 +1,19 @@
+ w2-validation-ux
+import BookingPage from "./pages/BookingPage.jsx";
+import AppointmentList from "./pages/AppointmentList.jsx";
+import { Toaster } from "react-hot-toast";
+
+export default function App() {
+    return (
+        <div style={{ padding: 16 }}>
+            <h1>Appointments Demo</h1>
+            <BookingPage />
+            <hr />
+            <AppointmentList />
+            <Toaster position="top-right" />
+        </div>
+    );
+
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import BookingPage from "./BookingPage";
 import AvailabilityPage from "./AvailabilityPage";
@@ -23,4 +39,5 @@ export default function App() {
       </Routes>
     </Router>
   );
+ main
 }
