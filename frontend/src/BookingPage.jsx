@@ -11,7 +11,10 @@ const BookingSchema = z.object({
   date: z.string().min(1, "Pick a date"),
   time: z.string().min(1, "Pick a time"),
   name: z.string().min(2, "Name is too short"),
-  phone: z.string().min(7, "Phone is too short").regex(phoneRegex, "Enter a valid phone number"),
+  phone: z
+    .string()
+    .min(7, "Phone is too short")
+    .regex(phoneRegex, "Enter a valid phone number"),
   notes: z.string().max(500, "Max 500 characters").optional(),
   company: z.string().optional(), // honeypot
 });
@@ -37,19 +40,29 @@ function toLocalMinDateStr() {
 function isPastDateTime(dateStr, timeStr) {
   try {
     const [h, m] = timeStr.split(":").map(Number);
-    const dt = new Date(`${dateStr}T${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:00`);
+    const dt = new Date(
+      `${dateStr}T${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:00`
+    );
     return dt.getTime() < Date.now();
-  } catch { return false; }
+  } catch {
+    return false;
+  }
 }
 async function createBooking(apiBaseUrl, payload, idempotencyKey) {
   const res = await fetch(`${apiBaseUrl}/bookings`, {
     method: "POST",
-    headers: { "Content-Type": "application/json", "X-Idempotency-Key": idempotencyKey },
+    headers: {
+      "Content-Type": "application/json",
+      "X-Idempotency-Key": idempotencyKey,
+    },
     body: JSON.stringify(payload),
   });
   if (!res.ok) {
     let msg = "";
-    try { const data = await res.json(); msg = data?.message || data?.error || ""; } catch {}
+    try {
+      const data = await res.json();
+      msg = data?.message || data?.error || "";
+    } catch {}
     throw new Error(msg || `Request failed (${res.status})`);
   }
   return res.json();
@@ -75,8 +88,8 @@ function generateSlots(dateStr, start = "09:00", end = "17:00", stepMin = 30) {
 
 /** Normalize various availability API shapes to a boolean map */
 function normalizeAvailability(dateStr, data) {
-  // Supported shapes:
-  // { slots: ["09:00","09:30"], booked: ["10:00"] }
+  // Supports:
+  // { slots: ["09:00"], booked: ["10:00"] }
   // { available: ["09:00"], unavailable: ["10:00"] }
   // { times: [{time:"09:00", available:true}, ...] }
   const set = new Set();
@@ -84,21 +97,21 @@ function normalizeAvailability(dateStr, data) {
 
   if (Array.isArray(data?.slots)) {
     all = data.slots;
-    (data.booked || data.unavailable || []).forEach(t => set.add(t));
+    (data.booked || data.unavailable || []).forEach((t) => set.add(t));
   } else if (Array.isArray(data?.available) || Array.isArray(data?.unavailable)) {
     all = (data.available || []).concat(data.unavailable || []);
-    (data.unavailable || []).forEach(t => set.add(t));
+    (data.unavailable || []).forEach((t) => set.add(t));
   } else if (Array.isArray(data?.times)) {
-    all = data.times.map(x => x.time);
-    data.times.forEach(x => { if (!x.available) set.add(x.time); });
+    all = data.times.map((x) => x.time);
+    data.times.forEach((x) => {
+      if (!x.available) set.add(x.time);
+    });
   }
 
-  // Fallback if API didn't give any slots
   if (all.length === 0) all = generateSlots(dateStr);
 
-  // Build map
   const map = {};
-  all.forEach(t => {
+  all.forEach((t) => {
     const past = isPastDateTime(dateStr, t);
     map[t] = !(set.has(t) || past);
   });
@@ -108,14 +121,14 @@ function normalizeAvailability(dateStr, data) {
 // --- Component ---
 export default function BookingPage({
   services = ["Consultation", "Follow-up", "Support"],
-  apiBaseUrl
+  apiBaseUrl,
 }) {
   const minDate = toLocalMinDateStr();
   const resolvedApi = useMemo(() => getApiBaseUrl(apiBaseUrl), [apiBaseUrl]);
   const [banner, setBanner] = useState({ kind: "success", text: "" });
 
   // availability state
-  const [slots, setSlots] = useState([]);                 // [{time:"09:00", available:true}, ...]
+  const [slots, setSlots] = useState([]); // [{time:"09:00", available:true}, ...]
   const [loadingSlots, setLoadingSlots] = useState(false);
   const [selectedTime, setSelectedTime] = useState("");
 
@@ -125,15 +138,22 @@ export default function BookingPage({
     watch,
     reset,
     setValue,
-    formState: { errors, isSubmitting }
+    formState: { errors, isSubmitting },
   } = useForm({
     resolver: zodResolver(BookingSchema),
-    defaultValues: { service: "", date: "", time: "", name: "", phone: "", notes: "", company: "" },
+    defaultValues: {
+      service: "",
+      date: "",
+      time: "",
+      name: "",
+      phone: "",
+      notes: "",
+      company: "",
+    },
     mode: "onBlur",
   });
 
   const dateVal = watch("date");
-  const todaySelected = dateVal === minDate;
 
   // Load availability when date changes
   useEffect(() => {
@@ -149,21 +169,26 @@ export default function BookingPage({
 
     (async () => {
       try {
-        // Try the real backend:
         const r = await fetch(`${resolvedApi}/availability?date=${dateVal}`);
         if (r.ok) {
           const data = await r.json();
           const map = normalizeAvailability(dateVal, data);
-          const arr = Object.keys(map).sort().map(t => ({ time: t, available: map[t] }));
+          const arr = Object.keys(map)
+            .sort()
+            .map((t) => ({ time: t, available: map[t] }));
           setSlots(arr);
         } else {
-          // Fallback: local generator
-          const arr = generateSlots(dateVal).map(t => ({ time: t, available: !isPastDateTime(dateVal, t) }));
+          const arr = generateSlots(dateVal).map((t) => ({
+            time: t,
+            available: !isPastDateTime(dateVal, t),
+          }));
           setSlots(arr);
         }
       } catch {
-        // No backend reachable → fallback local
-        const arr = generateSlots(dateVal).map(t => ({ time: t, available: !isPastDateTime(dateVal, t) }));
+        const arr = generateSlots(dateVal).map((t) => ({
+          time: t,
+          available: !isPastDateTime(dateVal, t),
+        }));
         setSlots(arr);
       } finally {
         setLoadingSlots(false);
@@ -204,9 +229,19 @@ export default function BookingPage({
       const idKey = newIdempotencyKey();
       const data = await createBooking(resolvedApi, payload, idKey);
       // block the slot in the current view
-      setSlots(prev => prev.map(s => s.time === values.time ? { ...s, available: false } : s));
+      setSlots((prev) =>
+        prev.map((s) => (s.time === values.time ? { ...s, available: false } : s))
+      );
       setSelectedTime("");
-      reset({ service: values.service, date: values.date, time: "", name: "", phone: "", notes: "", company: "" });
+      reset({
+        service: values.service,
+        date: values.date,
+        time: "",
+        name: "",
+        phone: "",
+        notes: "",
+        company: "",
+      });
       setBanner({ kind: "success", text: data?.message || "✅ Booking created! We’ll contact you soon." });
     } catch (err) {
       setBanner({ kind: "error", text: err.message || "Could not submit. Try again." });
@@ -241,7 +276,9 @@ export default function BookingPage({
               </label>
               <select id="service" className="bp-select" {...register("service")} aria-invalid={!!errors.service}>
                 <option value="">Select…</option>
-                {services.map(s => <option key={s} value={s}>{s}</option>)}
+                {services.map((s) => (
+                  <option key={s} value={s}>{s}</option>
+                ))}
               </select>
               {errors.service && <p className="bp-error">{errors.service.message}</p>}
             </div>
@@ -251,7 +288,14 @@ export default function BookingPage({
               <label htmlFor="date" className="bp-label">
                 <span className="bp-ico" aria-hidden>📅</span> Date
               </label>
-              <input id="date" type="date" min={minDate} className="bp-input" {...register("date")} aria-invalid={!!errors.date} />
+              <input
+                id="date"
+                type="date"
+                min={minDate}
+                className="bp-input"
+                {...register("date")}
+                aria-invalid={!!errors.date}
+              />
               {errors.date && <p className="bp-error">{errors.date.message}</p>}
             </div>
 
@@ -294,14 +338,28 @@ export default function BookingPage({
                 <label htmlFor="name" className="bp-label">
                   <span className="bp-ico" aria-hidden>👤</span> Full Name
                 </label>
-                <input id="name" type="text" placeholder="Your name" className="bp-input" {...register("name")} aria-invalid={!!errors.name} />
+                <input
+                  id="name"
+                  type="text"
+                  placeholder="Your name"
+                  className="bp-input"
+                  {...register("name")}
+                  aria-invalid={!!errors.name}
+                />
                 {errors.name && <p className="bp-error">{errors.name.message}</p>}
               </div>
               <div className="bp-field">
                 <label htmlFor="phone" className="bp-label">
                   <span className="bp-ico" aria-hidden>📱</span> Phone
                 </label>
-                <input id="phone" type="tel" placeholder="+968…" className="bp-input" {...register("phone")} aria-invalid={!!errors.phone} />
+                <input
+                  id="phone"
+                  type="tel"
+                  placeholder="+968…"
+                  className="bp-input"
+                  {...register("phone")}
+                  aria-invalid={!!errors.phone}
+                />
                 {errors.phone && <p className="bp-error">{errors.phone.message}</p>}
                 <p className="bp-hint">We’ll use this to confirm your booking.</p>
               </div>
@@ -312,12 +370,19 @@ export default function BookingPage({
               <label htmlFor="notes" className="bp-label">
                 <span className="bp-ico" aria-hidden>📝</span> Notes (optional)
               </label>
-              <textarea id="notes" placeholder="Anything we should know?" className="bp-textarea" {...register("notes")} />
+              <textarea
+                id="notes"
+                placeholder="Anything we should know?"
+                className="bp-textarea"
+                {...register("notes")}
+              />
             </div>
 
             {/* Honeypot */}
             <div aria-hidden="true" className="sr-only">
-              <label>Company <input type="text" tabIndex={-1} autoComplete="off" {...register("company")} /></label>
+              <label>
+                Company <input type="text" tabIndex={-1} autoComplete="off" {...register("company")} />
+              </label>
             </div>
 
             <button type="submit" className={`bp-btn ${isSubmitting ? "bp-btn--busy" : ""}`} disabled={isSubmitting}>
@@ -325,7 +390,9 @@ export default function BookingPage({
               {isSubmitting ? "Submitting…" : "Confirm Booking"}
             </button>
 
-            <p className="bp-terms">By confirming, you agree to our appointment policy. You’ll receive a confirmation by SMS/WhatsApp.</p>
+            <p className="bp-terms">
+              By confirming, you agree to our appointment policy. You’ll receive a confirmation by SMS/WhatsApp.
+            </p>
           </form>
         </section>
       </main>

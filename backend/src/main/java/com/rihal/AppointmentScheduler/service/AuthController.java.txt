@@ -1,0 +1,70 @@
+// File: backend/src/main/java/com/project/service/AuthService.java
+package com.project.service;
+
+import com.project.model.User;
+import com.project.model.Role;
+import com.project.repository.UserRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@Service
+public class AuthService {
+
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+
+    // Constructor for dependency injection
+    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
+
+    /**
+     * Registers a new user with a specific role.
+     * @param user The user entity to be registered.
+     * @return The saved user entity.
+     * @throws IllegalStateException if a user with the given email already exists.
+     */
+    @Transactional
+    public User registerUser(User user) {
+        // Check if the email is already in use to prevent duplicate accounts
+        if (userRepository.findByEmail(user.getEmail()).isPresent()) {
+            throw new IllegalStateException("Email already registered");
+        }
+
+        // Hash the user's password before saving it to the database for security
+        String encodedPassword = passwordEncoder.encode(user.getPassword());
+        user.setPassword(encodedPassword);
+
+        // Assign the default role based on the provided role
+        if (user.getRole() == null) {
+            user.setRole(Role.CUSTOMER); // Default to CUSTOMER if not specified
+        }
+
+        // Save the new user to the database
+        return userRepository.save(user);
+    }
+
+    /**
+     * Authenticates a user based on email and password.
+     * @param email The user's email.
+     * @param password The user's plain-text password.
+     * @return The authenticated user entity.
+     * @throws IllegalStateException if the user is not found or the password does not match.
+     */
+    public User login(String email, String password) {
+        // Find the user by their email. Use orElseThrow to handle not-found case.
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalStateException("User not found"));
+
+        // Compare the provided password with the hashed password in the database
+        if (passwordEncoder.matches(password, user.getPassword())) {
+            // If passwords match, return the user object
+            return user;
+        } else {
+            // If passwords don't match, throw an exception
+            throw new IllegalStateException("Invalid password");
+        }
+    }
+}

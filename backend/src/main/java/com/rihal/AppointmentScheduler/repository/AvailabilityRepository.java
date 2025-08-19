@@ -5,20 +5,25 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+
 import java.time.DayOfWeek;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @Repository
-public interface AvailabilityRepository extends JpaRepository<Availability, Long> {
+public interface AvailabilityRepository extends JpaRepository<Availability, UUID> {
 
-    List<Availability> findByProviderId(Long providerId);
+    List<Availability> findByProviderId(UUID providerId);
 
-    List<Availability> findByProviderIdAndIsActive(Long providerId, Boolean isActive);
+    List<Availability> findByProviderIdAndIsActive(UUID providerId, Boolean isActive);
 
-    List<Availability> findByProviderIdAndDayOfWeek(Long providerId, DayOfWeek dayOfWeek);
+    List<Availability> findByProviderIdAndDayOfWeek(UUID providerId, DayOfWeek dayOfWeek);
 
     @Query("SELECT a FROM Availability a WHERE a.provider.id = :providerId AND a.isActive = true ORDER BY a.dayOfWeek, a.startTime")
-    List<Availability> findActiveAvailabilitiesByProvider(@Param("providerId") Long providerId);
+    List<Availability> findActiveAvailabilitiesByProvider(@Param("providerId") UUID providerId);
 
-    boolean existsByProviderIdAndDayOfWeek(Long providerId, DayOfWeek dayOfWeek);
+    boolean existsByProviderIdAndDayOfWeek(UUID providerId, DayOfWeek dayOfWeek);
+
+    Optional<Availability> findByProviderIdAndDayOfWeek(UUID providerId, DayOfWeek dayOfWeek);
 }
