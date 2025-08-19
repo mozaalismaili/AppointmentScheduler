@@ -1,7 +1,3 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { api } from '../api/client';
-import { endpoints } from '../api/endpoints';
-
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "../api/client";
 import { endpoints } from "../api/endpoints";
@@ -9,14 +5,22 @@ import { endpoints } from "../api/endpoints";
 export function useMyAppointments() {
   return useQuery({
     queryKey: ["appointments", "me"],
-    queryFn: async () => (await api.get(endpoints.myAppointments)).data,
+    queryFn: async () => {
+      const { data } = await api.get(endpoints.myAppointments);
+      return data;
+    },
   });
 }
 
 export function useCancelAppointment() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (id) => (await api.post(endpoints.cancel(id))).data,
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["appointments", "me"] }),
+    mutationFn: async (id) => {
+      const { data } = await api.post(endpoints.cancel(id));
+      return data;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["appointments", "me"] });
+    },
   });
 }

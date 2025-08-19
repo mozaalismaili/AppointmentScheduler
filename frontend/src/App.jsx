@@ -1,5 +1,6 @@
 import BookingPage from "./pages/BookingPage.jsx";
 import AppointmentList from "./pages/AppointmentList.jsx";
+import { Toaster } from "react-hot-toast";
 
 export default function App() {
     return (
@@ -8,6 +9,7 @@ export default function App() {
             <BookingPage />
             <hr />
             <AppointmentList />
+            <Toaster position="top-right" />
         </div>
     );
 }

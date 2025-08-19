@@ -7,8 +7,10 @@ export const availabilityKey = (date) => ["availability", date];
 export function useAvailability(date) {
   return useQuery({
     queryKey: availabilityKey(date),
-    queryFn: async () =>
-        (await api.get(endpoints.getAvailability, { params: { date } })).data,
+    queryFn: async () => {
+      const { data } = await api.get(endpoints.getAvailability, { params: { date } });
+      return data;
+    },
     staleTime: 60_000,
   });
 }
@@ -16,10 +18,15 @@ export function useAvailability(date) {
 export function useBookAppointment() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (payload) => (await api.post(endpoints.book, payload)).data,
+    mutationFn: async (payload) => {
+      const { data } = await api.post(endpoints.book, payload);
+      return data;
+    },
     onSuccess: (_res, vars) => {
       qc.invalidateQueries({ queryKey: ["appointments", "me"] });
-      if (vars?.date) qc.invalidateQueries({ queryKey: availabilityKey(vars.date) });
+      if (vars?.date) {
+        qc.invalidateQueries({ queryKey: availabilityKey(vars.date) });
+      }
     },
   });
 }
