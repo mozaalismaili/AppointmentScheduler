@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import BookingPage from "./BookingPage";
 import AvailabilityPage from "./AvailabilityPage";
 import LoginSignup from "./components/LoginSignup/LoginSignup";
+import ProviderDashboard from "./ProviderDashboard";   
 import "./components/LoginSignup/LoginSignup.css";
 
 export default function App() {
@@ -16,6 +17,9 @@ export default function App() {
 
         {/* Availability */}
         <Route path="/availability" element={<AvailabilityPage />} />
+
+        {/* Provider Dashboard (calendar view) */}
+        <Route path="/provider" element={<ProviderDashboard />} /> 
       </Routes>
     </Router>
   );

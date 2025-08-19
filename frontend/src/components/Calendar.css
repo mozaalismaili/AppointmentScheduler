@@ -1,0 +1,115 @@
+.cal {
+    display: flex;
+    flex-direction: column;
+    gap: .75rem;
+  }
+  
+  .cal__toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  
+  .cal__left,
+  .cal__right {
+    display: flex;
+    gap: .5rem;
+  }
+  
+  .cal__btn {
+    padding: .35rem .6rem;
+    border: 1px solid #334155;
+    background: #1e293b;
+    color: #f1f5f9;
+    border-radius: .5rem;
+    cursor: pointer;
+  }
+  .cal__btn:hover {
+    background: #334155;
+  }
+  
+  .cal__label {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: #f8fafc;
+  }
+  
+  .cal__grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    grid-auto-rows: 110px;
+    gap: 2px;
+    background: #0f172a;
+    border: 1px solid #1e293b;
+    border-radius: .75rem;
+    overflow: hidden;
+  }
+  
+  .cal__dow {
+    background: #0f172a;
+    color: #94a3b8;
+    font-size: .85rem;
+    padding: .5rem .6rem;
+    border-bottom: 1px solid #334155;
+  }
+  
+  .cal__cell {
+    background: #1e293b;
+    color: #f1f5f9;
+    text-align: left;
+    padding: .4rem;
+    border: none;
+    cursor: pointer;
+    position: relative;
+  }
+  .cal__cell:hover {
+    background: #334155;
+  }
+  .cal__cell--muted {
+    color: #64748b;
+    background: #0f172a;
+  }
+  .cal__cell--today {
+    outline: 2px solid #3b82f6;
+    z-index: 1;
+  }
+  
+  .cal__date {
+    font-size: .9rem;
+    font-weight: 600;
+    margin-bottom: .25rem;
+  }
+  
+  .cal__events {
+    display: flex;
+    flex-direction: column;
+    gap: .25rem;
+  }
+  
+  .cal__pill {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    padding: .15rem .4rem;
+    border-radius: .4rem;
+    background: #334155;
+    color: #f8fafc;
+    font-size: .78rem;
+    width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .cal__pill-dot {
+    width: .5rem;
+    height: .5rem;
+    border-radius: 999px;
+    background: #60a5fa;
+  }
+  
+  .cal__pill-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
