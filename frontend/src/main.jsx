@@ -15,6 +15,7 @@ async function prepare() {
         console.log("MSW mocking enabled");
     }
 }
+
 prepare().then(() => {
     ReactDOM.createRoot(document.getElementById("root")).render(
         <Provider store={store}>

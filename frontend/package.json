@@ -16,8 +16,11 @@
     "msw": "^2.10.4",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
+    "react-redux": "^9.2.0",
     "react-hot-toast": "^2.6.0",
-    "react-redux": "^9.2.0"
+    "react-router-dom": "^6.26.2",
+    "react-hook-form": "^7.53.0",
+    "@hookform/resolvers": "^3.9.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.33.0",
@@ -31,8 +34,6 @@
     "vite": "^7.1.2"
   },
   "msw": {
-    "workerDirectory": [
-      "public"
-    ]
+    "workerDirectory": ["public"]
   }
 }
