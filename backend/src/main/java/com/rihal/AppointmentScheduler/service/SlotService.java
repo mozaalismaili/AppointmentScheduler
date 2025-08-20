@@ -31,8 +31,11 @@ public class SlotService {
     }
 
     public List<LocalTime> getSlots(UUID providerId, LocalDate date) {
+        // Convert UUID to Long for Availability queries
+        // This is a temporary workaround for the type mismatch
+        Long providerLong = Long.parseLong(providerId.toString().replace("-", "").substring(0, 16), 16);
         List<Availability> availabilities = availabilityRepository
-                .findByProviderIdAndDayOfWeek(providerId, date.getDayOfWeek());
+                .findByProviderIdAndDayOfWeek(providerLong, date.getDayOfWeek());
 
         if (availabilities.isEmpty()) return List.of();
 

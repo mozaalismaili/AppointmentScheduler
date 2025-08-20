@@ -257,6 +257,7 @@ logging.level.com.rihal.AppointmentScheduler=DEBUG
 ## 📈 Future Enhancements
 
 - [ ] JWT token authentication
+- [x] Notification DB logging for sent messages
 - [ ] Email notifications
 - [ ] SMS reminders
 - [ ] Calendar integration
@@ -277,4 +278,3 @@ logging.level.com.rihal.AppointmentScheduler=DEBUG
 This project is licensed under the MIT License.
 
 ---
-
