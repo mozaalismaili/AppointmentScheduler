@@ -6,6 +6,7 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
@@ -29,18 +30,18 @@ public class SlotService {
         this.appointmentRepository = appointmentRepository;
     }
 
-    public List<LocalTime> getSlots(Long providerId, LocalDate date) {
+    public List<LocalTime> getSlots(UUID providerId, LocalDate date) {
         List<Availability> availabilities = availabilityRepository
                 .findByProviderIdAndDayOfWeek(providerId, date.getDayOfWeek());
-        
+
         if (availabilities.isEmpty()) return List.of();
-        
+
         // Get the first availability for the day (assuming one per day)
         Availability availability = availabilities.get(0);
 
         List<LocalTime> allSlots = enumerate(availability.getStartTime(), availability.getEndTime(), STEP);
         List<Appointment> booked = appointmentRepository
-                .findByProviderIdAndDateAndStatus(providerId, date, "BOOKED");
+                .findByProviderIdAndDateAndStatus(providerId, date, Appointment.Status.BOOKED);
 
         Set<LocalTime> taken = booked.stream()
                 .map(Appointment::getStartTime)
