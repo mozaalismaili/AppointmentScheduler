@@ -1,16 +1,28 @@
 package com.rihal.AppointmentScheduler.repository;
 
-import com.rihal.AppointmentScheduler.model.Appointment;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
-
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
+import com.rihal.AppointmentScheduler.model.Appointment;
+
+import jakarta.persistence.LockModeType;
+
 public interface AppointmentRepository extends JpaRepository<Appointment, UUID> {
     List<Appointment> findByProviderIdAndDateAndStatus(UUID providerId, LocalDate date, String status);
+    
+    // Find appointments by customer ID
+    List<Appointment> findByCustomerId(UUID customerId);
+    
+    // Find appointments by provider ID
+    List<Appointment> findByProviderId(UUID providerId);
+    
     // Check if another booked appointment overlaps the new requested slot
     @Query("""
         SELECT CASE WHEN COUNT(a) > 0 THEN TRUE ELSE FALSE END

@@ -6,11 +6,16 @@ import java.time.LocalTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "appointments",
-        uniqueConstraints = @UniqueConstraint(columnNames = {"provider_id","date","start_time"}))
+@Table(
+        name = "appointments",
+        uniqueConstraints = @UniqueConstraint(columnNames = {"provider_id","date","start_time"})
+)
 public class Appointment {
 
-    @Id @GeneratedValue
+    public enum Status { BOOKED, CANCELLED }
+
+    @Id
+    @GeneratedValue
     private UUID id;
 
     @Column(name = "customer_id", nullable = false)
@@ -28,10 +33,11 @@ public class Appointment {
     @Column(name = "end_time", nullable = false)
     private LocalTime endTime;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String status; // BOOKED or CANCELLED
+    private Status status = Status.BOOKED;
 
-    // --- Getters / Setters ---
+    // --- Getters & Setters ---
     public UUID getId() { return id; }
     public void setId(UUID id) { this.id = id; }
 
@@ -50,6 +56,6 @@ public class Appointment {
     public LocalTime getEndTime() { return endTime; }
     public void setEndTime(LocalTime endTime) { this.endTime = endTime; }
 
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
+    public Status getStatus() { return status; }
+    public void setStatus(Status status) { this.status = status; }
 }

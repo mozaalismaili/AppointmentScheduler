@@ -1,29 +1,26 @@
 package com.rihal.AppointmentScheduler.repository;
 
-import com.rihal.AppointmentScheduler.model.Availability;
+import java.time.DayOfWeek;
+import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.time.DayOfWeek;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import com.rihal.AppointmentScheduler.model.Availability;
 
 @Repository
-public interface AvailabilityRepository extends JpaRepository<Availability, UUID> {
+public interface AvailabilityRepository extends JpaRepository<Availability, Long> {
 
-    List<Availability> findByProviderId(UUID providerId);
+    List<Availability> findByProviderId(Long providerId);
 
-    List<Availability> findByProviderIdAndIsActive(UUID providerId, Boolean isActive);
+    List<Availability> findByProviderIdAndIsActive(Long providerId, Boolean isActive);
 
-    List<Availability> findByProviderIdAndDayOfWeek(UUID providerId, DayOfWeek dayOfWeek);
+    List<Availability> findByProviderIdAndDayOfWeek(Long providerId, DayOfWeek dayOfWeek);
 
     @Query("SELECT a FROM Availability a WHERE a.provider.id = :providerId AND a.isActive = true ORDER BY a.dayOfWeek, a.startTime")
-    List<Availability> findActiveAvailabilitiesByProvider(@Param("providerId") UUID providerId);
+    List<Availability> findActiveAvailabilitiesByProvider(@Param("providerId") Long providerId);
 
-    boolean existsByProviderIdAndDayOfWeek(UUID providerId, DayOfWeek dayOfWeek);
-
-    Optional<Availability> findByProviderIdAndDayOfWeek(UUID providerId, DayOfWeek dayOfWeek);
+    boolean existsByProviderIdAndDayOfWeek(Long providerId, DayOfWeek dayOfWeek);
 }
