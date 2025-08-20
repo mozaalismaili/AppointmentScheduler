@@ -8,19 +8,23 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 
 import com.rihal.AppointmentScheduler.model.Appointment;
+import com.rihal.AppointmentScheduler.model.NotificationLog.Channel;
 import com.rihal.AppointmentScheduler.repository.AppointmentRepository;
 
 @Service
 public class AppointmentService {
 
     private final AppointmentRepository appointmentRepository;
+    private final NotificationService notificationService;
     
     // Configurable cancellation limits
     private static final int DEFAULT_CANCELLATION_LIMIT_HOURS = 24;
     private static final int GRACE_PERIOD_MINUTES = 15; // Allow small grace period
 
-    public AppointmentService(AppointmentRepository appointmentRepository) {
+    public AppointmentService(AppointmentRepository appointmentRepository,
+                              NotificationService notificationService) {
         this.appointmentRepository = appointmentRepository;
+        this.notificationService = notificationService;
     }
 
     public String cancelAppointment(UUID appointmentId, UUID userId) {
@@ -64,6 +68,19 @@ public class AppointmentService {
         // 4. Cancel appointment
         appt.setStatus(Appointment.Status.CANCELLED);
         appointmentRepository.save(appt);
+
+        // 5. Log notification for cancellation (DB only; actual sending can be added later)
+        String subject = "Appointment Cancelled";
+        String content = "Your appointment on " + appt.getDate() + " at " + appt.getStartTime() + " has been cancelled.";
+        notificationService.logSent(
+                "APPOINTMENT_CANCELLED",
+                Channel.IN_APP,
+                appt.getCustomerId(),
+                appt.getId(),
+                subject,
+                content,
+                null
+        );
 
         return "Appointment cancelled successfully.";
     }

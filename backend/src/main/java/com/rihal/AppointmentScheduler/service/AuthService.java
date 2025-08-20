@@ -15,10 +15,12 @@ public class AuthService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final NotificationService notificationService;
 
-    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, NotificationService notificationService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.notificationService = notificationService;
     }
 
     @Transactional
@@ -40,7 +42,20 @@ public class AuthService {
             request.getPhone()
         );
 
-        return userRepository.save(user);
+        User saved = userRepository.save(user);
+
+        // Log notification of registration (DB only)
+        notificationService.logSent(
+            "USER_REGISTERED",
+            com.rihal.AppointmentScheduler.model.NotificationLog.Channel.IN_APP,
+            null,
+            null,
+            "Welcome to Appointment Scheduler",
+            "Account created for " + saved.getEmail(),
+            null
+        );
+
+        return saved;
     }
 
     public User login(String email, String password) {
