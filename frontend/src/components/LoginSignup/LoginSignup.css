@@ -105,3 +105,14 @@
     background: #eaeaea;
     color: #676767;
 }
+
+.err {
+    color: #c53030;
+    margin-left: 62px;
+    margin-top: 6px;
+    font-size: 14px;
+  }
+  button[disabled] { opacity: 0.6; cursor: not-allowed; }
+  .simple-toast { position: fixed; top: 20px; right: 20px; padding: 8px 12px; border-radius: 8px; color: white; z-index: 60; }
+  .simple-toast.ok { background: #16a34a; } .simple-toast.bad { background: #dc2626; }
+  
