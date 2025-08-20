@@ -1,55 +1,40 @@
 package com.rihal.AppointmentScheduler.model;
 
 import jakarta.persistence.*;
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.UUID;
+import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "appointments",
-        uniqueConstraints = @UniqueConstraint(columnNames = {"provider_id","date","start_time"}))
+@Table(name = "appointments")
 public class Appointment {
-
-    @Id @GeneratedValue
-    private UUID id;
-
-    @Column(name = "customer_id", nullable = false)
-    private UUID customerId;
-
-    @Column(name = "provider_id", nullable = false)
-    private UUID providerId;
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @Column(nullable = false)
-    private LocalDate date;
-
-    @Column(name = "start_time", nullable = false)
-    private LocalTime startTime;
-
-    @Column(name = "end_time", nullable = false)
-    private LocalTime endTime;
+    private Long customerId;
 
     @Column(nullable = false)
-    private String status; // BOOKED or CANCELLED
+    private Long providerId;
 
-    // --- Getters / Setters ---
-    public UUID getId() { return id; }
-    public void setId(UUID id) { this.id = id; }
+    @Column(nullable = false)
+    private LocalDateTime appointmentTime;
 
-    public UUID getCustomerId() { return customerId; }
-    public void setCustomerId(UUID customerId) { this.customerId = customerId; }
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private AppointmentStatus status = AppointmentStatus.BOOKED;
 
-    public UUID getProviderId() { return providerId; }
-    public void setProviderId(UUID providerId) { this.providerId = providerId; }
+    @Column(length = 500)
+    private String notes;
 
-    public LocalDate getDate() { return date; }
-    public void setDate(LocalDate date) { this.date = date; }
-
-    public LocalTime getStartTime() { return startTime; }
-    public void setStartTime(LocalTime startTime) { this.startTime = startTime; }
-
-    public LocalTime getEndTime() { return endTime; }
-    public void setEndTime(LocalTime endTime) { this.endTime = endTime; }
-
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
+    // getters/setters
+    public Long getId() { return id; }
+    public Long getCustomerId() { return customerId; }
+    public void setCustomerId(Long customerId) { this.customerId = customerId; }
+    public Long getProviderId() { return providerId; }
+    public void setProviderId(Long providerId) { this.providerId = providerId; }
+    public LocalDateTime getAppointmentTime() { return appointmentTime; }
+    public void setAppointmentTime(LocalDateTime appointmentTime) { this.appointmentTime = appointmentTime; }
+    public AppointmentStatus getStatus() { return status; }
+    public void setStatus(AppointmentStatus status) { this.status = status; }
+    public String getNotes() { return notes; }
+    public void setNotes(String notes) { this.notes = notes; }
 }
