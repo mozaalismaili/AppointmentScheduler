@@ -1,19 +1,21 @@
 package com.rihal.AppointmentScheduler.service;
 
-import com.rihal.AppointmentScheduler.model.Availability;
-import com.rihal.AppointmentScheduler.model.BreakTime;
-import com.rihal.AppointmentScheduler.model.User;
-import com.rihal.AppointmentScheduler.dto.AvailabilityDTO;
-import com.rihal.AppointmentScheduler.dto.BreakTimeDTO;
-import com.rihal.AppointmentScheduler.repository.AvailabilityRepository;
-import com.rihal.AppointmentScheduler.repository.UserRepository;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import com.rihal.AppointmentScheduler.dto.AvailabilityDTO;
+import com.rihal.AppointmentScheduler.dto.BreakTimeDTO;
+import com.rihal.AppointmentScheduler.model.Availability;
+import com.rihal.AppointmentScheduler.model.BreakTime;
+import com.rihal.AppointmentScheduler.model.User;
+import com.rihal.AppointmentScheduler.repository.AvailabilityRepository;
+import com.rihal.AppointmentScheduler.repository.UserRepository;
+
 import jakarta.persistence.EntityNotFoundException;
-import java.time.DayOfWeek;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional
