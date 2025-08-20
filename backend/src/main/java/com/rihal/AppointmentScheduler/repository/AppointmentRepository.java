@@ -25,6 +25,9 @@ public interface AppointmentRepository extends JpaRepository<Appointment, UUID> 
     // Find appointments by provider ID
     List<Appointment> findByProviderId(UUID providerId);
 
+    // Add missing method for CalendarService
+    List<Appointment> findByProviderIdAndDateBetween(UUID providerId, LocalDate start, LocalDate end);
+
     // Check if another booked appointment overlaps the requested slot
     @Query("""
         SELECT CASE WHEN COUNT(a) > 0 THEN TRUE ELSE FALSE END
