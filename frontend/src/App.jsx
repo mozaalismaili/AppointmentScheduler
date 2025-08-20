@@ -1,43 +1,32 @@
- w2-validation-ux
-import BookingPage from "./pages/BookingPage.jsx";
-import AppointmentList from "./pages/AppointmentList.jsx";
-import { Toaster } from "react-hot-toast";
+// src/App.jsx
+import React from "react";
+import { Routes, Route, Navigate } from "react-router-dom";
 
-export default function App() {
-    return (
-        <div style={{ padding: 16 }}>
-            <h1>Appointments Demo</h1>
-            <BookingPage />
-            <hr />
-            <AppointmentList />
-            <Toaster position="top-right" />
-        </div>
-    );
-
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Login from "./Login";
 import BookingPage from "./BookingPage";
 import AvailabilityPage from "./AvailabilityPage";
-import LoginSignup from "./components/LoginSignup/LoginSignup";
-import ProviderDashboard from "./ProviderDashboard";   
-import "./components/LoginSignup/LoginSignup.css";
+import CustomerDashboard from "./CustomerDashboard";
+import ProviderDashboard from "./ProviderDashboard";
 
 export default function App() {
   return (
-    <Router>
-      <Routes>
-        {/* Homepage → Booking */}
-        <Route path="/" element={<BookingPage apiBaseUrl="http://localhost:3001" />} />
+    <Routes>
+      {/* Default → login */}
+      <Route path="/" element={<Navigate to="/login" replace />} />
 
-        {/* Login/Signup */}
-        <Route path="/login" element={<LoginSignup />} />
+      {/* Auth */}
+      <Route path="/login" element={<Login />} />
 
-        {/* Availability */}
-        <Route path="/availability" element={<AvailabilityPage />} />
+      {/* Customer */}
+      <Route path="/customer" element={<CustomerDashboard />} />
+      <Route path="/book" element={<BookingPage />} />
 
-        {/* Provider Dashboard (calendar view) */}
-        <Route path="/provider" element={<ProviderDashboard />} /> 
-      </Routes>
-    </Router>
+      {/* Provider */}
+      <Route path="/provider" element={<ProviderDashboard />} />
+      <Route path="/availability" element={<AvailabilityPage />} />
+
+      {/* Fallback */}
+      <Route path="*" element={<Navigate to="/login" replace />} />
+    </Routes>
   );
- main
 }
