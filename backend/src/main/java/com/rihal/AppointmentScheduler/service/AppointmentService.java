@@ -82,6 +82,22 @@ public class AppointmentService {
                 null
         );
 
+        // 6. Notify provider (reminder of cancellation)
+        String providerSubject = "Cancellation Notice";
+        String providerContent = "Reminder: The appointment with customer " + appt.getCustomerId() +
+                " on " + appt.getDate() + " at " + appt.getStartTime() + " was cancelled.";
+
+        notificationService.logSent(
+                "APPOINTMENT_CANCELLATION_REMINDER",
+                Channel.IN_APP,
+                appt.getProviderId(),
+                appt.getId(),
+                providerSubject,
+                providerContent,
+                null
+        );
+
+
         return "Appointment cancelled successfully.";
     }
     
