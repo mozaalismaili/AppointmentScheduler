@@ -231,5 +231,7 @@ function labelStatus(status="booked"){
   if(s.includes("pending")) return "Pending";
   return "Booked";
 
+
+
   
 }
