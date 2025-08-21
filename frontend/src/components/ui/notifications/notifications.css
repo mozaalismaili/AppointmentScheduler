@@ -1,0 +1,10 @@
+.notif-stack{ position:fixed; top:12px; right:12px; display:grid; gap:8px; z-index:1000; }
+.notif{
+  padding:10px 12px; border-radius:10px; box-shadow:0 8px 24px rgba(0,0,0,.12);
+  display:flex; align-items:center; gap:10px; min-width:240px; font-size:14px;
+}
+.notif--success{ background:#e7f8ee; border:1px solid #3fbf77; color:#165a3b; }
+.notif--error  { background:#fde9ea; border:1px solid #e25b5b; color:#7a1d1d; }
+.notif--warning{ background:#fff6e6; border:1px solid #f1a93b; color:#6a4a12; }
+.notif--info   { background:#eaf2ff; border:1px solid #6a9dfc; color:#123a8c; }
+.notif-close{ margin-left:auto; background:transparent; border:0; font-size:16px; cursor:pointer; }
