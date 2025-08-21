@@ -1,22 +1,25 @@
 package com.rihal.AppointmentScheduler.service;
 
+import com.rihal.AppointmentScheduler.dto.BookingRequest;
+import com.rihal.AppointmentScheduler.model.Appointment;
+import com.rihal.AppointmentScheduler.model.AppointmentStatus;
+import com.rihal.AppointmentScheduler.model.NotificationLog.Channel;
+import com.rihal.AppointmentScheduler.repository.AppointmentRepository;
+
+import org.springframework.data.domain.*;
+import org.springframework.stereotype.Service;
+
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
-
-import org.springframework.stereotype.Service;
-
-import com.rihal.AppointmentScheduler.model.Appointment;
-import com.rihal.AppointmentScheduler.model.NotificationLog.Channel;
-import com.rihal.AppointmentScheduler.repository.AppointmentRepository;
 
 @Service
 public class AppointmentService {
 
     private final AppointmentRepository appointmentRepository;
     private final NotificationService notificationService;
-    
+
     // Configurable cancellation limits
     private static final int DEFAULT_CANCELLATION_LIMIT_HOURS = 24;
     private static final int GRACE_PERIOD_MINUTES = 15; // Allow small grace period
@@ -27,37 +30,46 @@ public class AppointmentService {
         this.notificationService = notificationService;
     }
 
+    // --- DTO-based retrieval methods ---
+    public Page<AppointmentDTO> getForCustomer(Long customerId, AppointmentStatus status,
+                                               LocalDateTime from, LocalDateTime to,
+                                               Pageable pageable) {
+        return appointmentRepository.searchCustomer(customerId, status, from, to, pageable)
+                                    .map(AppointmentDTO::from);
+    }
+
+    public Page<AppointmentDTO> getForProvider(Long providerId, AppointmentStatus status,
+                                               LocalDateTime from, LocalDateTime to,
+                                               Pageable pageable) {
+        return appointmentRepository.searchProvider(providerId, status, from, to, pageable)
+                                    .map(AppointmentDTO::from);
+    }
+
+    // --- Appointment cancellation logic ---
     public String cancelAppointment(UUID appointmentId, UUID userId) {
         Appointment appt = appointmentRepository.findById(appointmentId)
                 .orElseThrow(() -> new RuntimeException("Appointment not found"));
 
-        // 1. Check if appointment belongs to the customer
         if (!appt.getCustomerId().equals(userId)) {
             throw new RuntimeException("You can only cancel your own appointments.");
         }
 
-        // 2. Check if already cancelled
         if (appt.getStatus() == Appointment.Status.CANCELLED) {
             throw new RuntimeException("Appointment is already cancelled.");
         }
 
-        // 3. Enhanced time validation with grace period
         LocalDateTime startDateTime = LocalDateTime.of(appt.getDate(), appt.getStartTime());
         LocalDateTime now = LocalDateTime.now();
-        
-        // Check if appointment is in the past
+
         if (startDateTime.isBefore(now)) {
             throw new RuntimeException("Cannot cancel past appointments.");
         }
-        
-        // Get provider-specific cancellation policy (default to 24 hours)
+
         int cancellationLimitHours = getProviderCancellationPolicy(appt.getProviderId());
-        
         Duration timeUntilStart = Duration.between(now, startDateTime);
         long hoursBefore = timeUntilStart.toHours();
-        
+
         if (hoursBefore < cancellationLimitHours) {
-            // Check grace period
             long minutesBefore = timeUntilStart.toMinutes();
             if (minutesBefore < (cancellationLimitHours * 60 + GRACE_PERIOD_MINUTES)) {
                 throw new RuntimeException("Cancellations must be made at least " 
@@ -65,11 +77,9 @@ public class AppointmentService {
             }
         }
 
-        // 4. Cancel appointment
         appt.setStatus(Appointment.Status.CANCELLED);
         appointmentRepository.save(appt);
 
-        // 5. Log notification for cancellation (DB only; actual sending can be added later)
         String subject = "Appointment Cancelled";
         String content = "Your appointment on " + appt.getDate() + " at " + appt.getStartTime() + " has been cancelled.";
         notificationService.logSent(
@@ -82,42 +92,25 @@ public class AppointmentService {
                 null
         );
 
-        // 6. Notify provider (reminder of cancellation)
-        String providerSubject = "Cancellation Notice";
-        String providerContent = "Reminder: The appointment with customer " + appt.getCustomerId() +
-                " on " + appt.getDate() + " at " + appt.getStartTime() + " was cancelled.";
-
-        notificationService.logSent(
-                "APPOINTMENT_CANCELLATION_REMINDER",
-                Channel.IN_APP,
-                appt.getProviderId(),
-                appt.getId(),
-                providerSubject,
-                providerContent,
-                null
-        );
-
-
         return "Appointment cancelled successfully.";
     }
-    
+
+    // --- Helper & retrieval methods ---
     public Appointment getAppointmentById(UUID id) {
         return appointmentRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Appointment not found"));
     }
-    
+
     public List<Appointment> getAppointmentsByCustomer(UUID customerId) {
         return appointmentRepository.findByCustomerId(customerId);
     }
-    
+
     public List<Appointment> getAppointmentsByProvider(UUID providerId) {
         return appointmentRepository.findByProviderId(providerId);
     }
-    
-    // Get provider-specific cancellation policy
+
     private int getProviderCancellationPolicy(UUID providerId) {
         // TODO: Implement provider-specific policies from database
-        // For now, return default policy
         return DEFAULT_CANCELLATION_LIMIT_HOURS;
     }
 }

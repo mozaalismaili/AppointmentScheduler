@@ -8,11 +8,9 @@ import java.util.UUID;
 @Entity
 @Table(
         name = "appointments",
-        uniqueConstraints = @UniqueConstraint(columnNames = {"provider_id","date","start_time"})
+        uniqueConstraints = @UniqueConstraint(columnNames = {"provider_id", "date", "start_time"})
 )
 public class Appointment {
-
-    public enum Status { BOOKED, CANCELLED }
 
     @Id
     @GeneratedValue
@@ -35,7 +33,10 @@ public class Appointment {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private Status status = Status.BOOKED;
+    private AppointmentStatus status = AppointmentStatus.BOOKED;
+
+    @Column(length = 500)
+    private String notes;
 
     // --- Getters & Setters ---
     public UUID getId() { return id; }
@@ -56,6 +57,9 @@ public class Appointment {
     public LocalTime getEndTime() { return endTime; }
     public void setEndTime(LocalTime endTime) { this.endTime = endTime; }
 
-    public Status getStatus() { return status; }
-    public void setStatus(Status status) { this.status = status; }
+    public AppointmentStatus getStatus() { return status; }
+    public void setStatus(AppointmentStatus status) { this.status = status; }
+
+    public String getNotes() { return notes; }
+    public void setNotes(String notes) { this.notes = notes; }
 }
