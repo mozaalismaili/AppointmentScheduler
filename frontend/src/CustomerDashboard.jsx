@@ -1,51 +1,37 @@
 import React, { useEffect, useMemo, useState } from "react";
 import "./CustomerDashboard.css";
-
+import { fetchMyAppointments, cancelAppointment, rescheduleAppointment } from "./api";
 
 export default function CustomerDashboard({ apiBaseUrl }) {
-  const resolvedApi = useMemo(() => getApiBaseUrl(apiBaseUrl), [apiBaseUrl]);
-
-  // UI state
   const [tab, setTab] = useState("upcoming"); // "upcoming" | "past"
   const [q, setQ] = useState("");
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [loading, setLoading] = useState(true);
-  const [banner, setBanner] = useState({ kind: "success", text: "" });
-
-  // Data
+  const [banner, setBanner] = useState({ kind: "", text: "" });
   const [all, setAll] = useState([]);
 
-  // Load appointments
-  useEffect(() => {
+  async function loadAppointments(){
     setLoading(true);
-    (async () => {
-      try {
-        // Try real backend
-        const r = await fetch(`${resolvedApi}/my/appointments`);
-        if (!r.ok) throw new Error();
-        const data = await r.json();
-        setAll(normalizeAppointments(data));
-      } catch {
-        // Fallback (mock data)
-        const mock = mockAppointments();
-        setAll(mock);
-        setBanner({
-          kind: "success",
-          text: "", 
-        });
-      } finally {
-        setLoading(false);
-      }
-    })();
-  }, [resolvedApi]);
+    try{
+      const data = await fetchMyAppointments();
+      setAll(normalizeAppointments(data));
+      setBanner({ kind:"", text:"" });
+    }catch{
+      // fallback demo data
+      setAll(mockAppointments());
+      setBanner({ kind:"success", text:"" });
+    }finally{
+      setLoading(false);
+    }
+  }
 
-  // Derived lists
+  useEffect(()=>{ loadAppointments(); }, []);
+
   const now = Date.now();
   const filtered = useMemo(() => {
     let items = [...all];
 
-    // search by service or provider
     if (q.trim()) {
       const s = q.toLowerCase();
       items = items.filter(
@@ -55,11 +41,9 @@ export default function CustomerDashboard({ apiBaseUrl }) {
       );
     }
 
-    // date range
     if (from) items = items.filter((x) => toTime(x.date, x.time) >= new Date(from).getTime());
     if (to) items = items.filter((x) => toTime(x.date, x.time) <= endOfDayMs(new Date(to)));
 
-    // upcoming vs past
     const [up, past] = splitUpcomingPast(items, now);
     return tab === "upcoming" ? up : past;
   }, [all, q, from, to, tab, now]);
@@ -82,17 +66,10 @@ export default function CustomerDashboard({ apiBaseUrl }) {
         )}
 
         <section className="cd-card">
-          {/* Controls */}
           <div className="cd-controls" role="search">
             <div>
               <label className="cd-label" htmlFor="q">Search</label>
-              <input
-                id="q"
-                className="cd-input"
-                placeholder="Search by service or provider…"
-                value={q}
-                onChange={(e) => setQ(e.target.value)}
-              />
+              <input id="q" className="cd-input" placeholder="Search by service or provider…" value={q} onChange={(e) => setQ(e.target.value)} />
             </div>
             <div>
               <label className="cd-label" htmlFor="from">From</label>
@@ -103,23 +80,15 @@ export default function CustomerDashboard({ apiBaseUrl }) {
               <input id="to" className="cd-input" type="date" value={to} onChange={e => setTo(e.target.value)} />
             </div>
             <div>
-              <button className="cd-btn cd-btn--ghost" onClick={() => { setQ(""); setFrom(""); setTo(""); }}>
-                Reset
-              </button>
+              <button className="cd-btn cd-btn--ghost" onClick={() => { setQ(""); setFrom(""); setTo(""); }}>Reset</button>
             </div>
           </div>
 
-          {/* Tabs */}
           <div className="cd-tabs" role="tablist" aria-label="Appointment type">
-            <button className="cd-tab" role="tab" aria-selected={tab === "upcoming"} onClick={() => setTab("upcoming")}>
-              Upcoming
-            </button>
-            <button className="cd-tab" role="tab" aria-selected={tab === "past"} onClick={() => setTab("past")}>
-              Past
-            </button>
+            <button className="cd-tab" role="tab" aria-selected={tab === "upcoming"} onClick={() => setTab("upcoming")}>Upcoming</button>
+            <button className="cd-tab" role="tab" aria-selected={tab === "past"} onClick={() => setTab("past")}>Past</button>
           </div>
 
-          {/* Content */}
           {loading ? (
             <DashboardSkeleton />
           ) : filtered.length === 0 ? (
@@ -129,7 +98,6 @@ export default function CustomerDashboard({ apiBaseUrl }) {
             </div>
           ) : (
             <>
-              {/* Desktop table */}
               <div className="cd-table-wrap" aria-hidden={false}>
                 <table className="cd-table">
                   <thead>
@@ -153,8 +121,26 @@ export default function CustomerDashboard({ apiBaseUrl }) {
                         <td className="cd-td">
                           <div className="cd-actions">
                             <button className="cd-btn cd-btn--ghost" onClick={() => alert(`Viewing #${a.id}`)}>View</button>
-                            <button className="cd-btn" disabled={!canReschedule(a)} onClick={() => alert(`Reschedule #${a.id}`)}>Reschedule</button>
-                            <button className="cd-btn cd-btn--ghost" disabled={!canCancel(a)} onClick={() => alert(`Cancel #${a.id}`)}>Cancel</button>
+                            <button
+                              className="cd-btn"
+                              disabled={!canReschedule(a)}
+                              onClick={async () => {
+                                const newDate = prompt("New date (YYYY-MM-DD):", a.date);
+                                const newTime = prompt("New time (HH:MM):", a.time);
+                                if (!newDate || !newTime) return;
+                                await rescheduleAppointment(a.id, { date:newDate, time:newTime });
+                                await loadAppointments();
+                              }}
+                            >Reschedule</button>
+                            <button
+                              className="cd-btn cd-btn--ghost"
+                              disabled={!canCancel(a)}
+                              onClick={async () => {
+                                if (!confirm("Cancel this appointment?")) return;
+                                await cancelAppointment(a.id);
+                                await loadAppointments();
+                              }}
+                            >Cancel</button>
                           </div>
                         </td>
                       </tr>
@@ -179,8 +165,18 @@ export default function CustomerDashboard({ apiBaseUrl }) {
                       <div>👤 {a.provider || "—"}</div>
                       <div className="cd-actions">
                         <button className="cd-btn cd-btn--ghost" onClick={() => alert(`View #${a.id}`)}>View</button>
-                        <button className="cd-btn" disabled={!canReschedule(a)} onClick={() => alert(`Reschedule #${a.id}`)}>Reschedule</button>
-                        <button className="cd-btn cd-btn--ghost" disabled={!canCancel(a)} onClick={() => alert(`Cancel #${a.id}`)}>Cancel</button>
+                        <button className="cd-btn" disabled={!canReschedule(a)} onClick={async () => {
+                          const newDate = prompt("New date (YYYY-MM-DD):", a.date);
+                          const newTime = prompt("New time (HH:MM):", a.time);
+                          if (!newDate || !newTime) return;
+                          await rescheduleAppointment(a.id, { date:newDate, time:newTime });
+                          await loadAppointments();
+                        }}>Reschedule</button>
+                        <button className="cd-btn cd-btn--ghost" disabled={!canCancel(a)} onClick={async () => {
+                          if (!confirm("Cancel this appointment?")) return;
+                          await cancelAppointment(a.id);
+                          await loadAppointments();
+                        }}>Cancel</button>
                       </div>
                     </div>
                   </article>
@@ -194,23 +190,8 @@ export default function CustomerDashboard({ apiBaseUrl }) {
   );
 }
 
-/* ---------------- helpers ---------------- */
-
-function getApiBaseUrl(explicit) {
-  if (explicit) return explicit;
-  try {
-    if (typeof import.meta !== "undefined" && import.meta.env?.VITE_API_BASE_URL) {
-      return import.meta.env.VITE_API_BASE_URL;
-    }
-    if (typeof process !== "undefined" && process.env?.REACT_APP_API_BASE_URL) {
-      return process.env.REACT_APP_API_BASE_URL;
-    }
-  } catch {}
-  return "/api";
-}
-
+/* ---------- helpers (same as your original, kept intact) ---------- */
 function normalizeAppointments(arr) {
-  // Accept a variety of shapes, return normalized
   if (!Array.isArray(arr)) return [];
   return arr.map((x, i) => ({
     id: x.id ?? String(i + 1),
@@ -221,15 +202,9 @@ function normalizeAppointments(arr) {
     status: (x.status || "confirmed").toLowerCase(),
   })).filter(x => x.date && x.time);
 }
-
 function mockAppointments() {
-  // Some demo data around "today"
   const today = new Date();
-  const d = (offset) => {
-    const t = new Date(today);
-    t.setDate(t.getDate() + offset);
-    return t.toISOString().slice(0,10);
-  };
+  const d = (offset) => { const t = new Date(today); t.setDate(t.getDate() + offset); return t.toISOString().slice(0,10); };
   return normalizeAppointments([
     { id: "A-1001", service: "Consultation", provider: "Dr. Ahmed", date: d(1), time: "09:00", status: "confirmed" },
     { id: "A-1002", service: "Follow-up",   provider: "Dr. Sara",  date: d(3), time: "11:30", status: "pending" },
@@ -237,61 +212,38 @@ function mockAppointments() {
     { id: "A-1004", service: "Consultation", provider: "Dr. Ali",  date: d(-10), time: "10:30", status: "cancelled" },
   ]);
 }
-
-function toTime(dateStr, timeStr){
-  const [h, m] = String(timeStr).split(":").map(Number);
-  return new Date(`${dateStr}T${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}:00`).getTime();
-}
+function toTime(dateStr, timeStr){ const [h, m] = String(timeStr).split(":").map(Number); return new Date(`${dateStr}T${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}:00`).getTime(); }
 function endOfDayMs(d){ const x = new Date(d); x.setHours(23,59,59,999); return x.getTime(); }
 function splitUpcomingPast(items, nowMs){
   const up = [], past = [];
   items.forEach(x => (toTime(x.date, x.time) >= nowMs ? up : past).push(x));
-  // Sort: upcoming asc, past desc
   up.sort((a,b)=>toTime(a.date,a.time)-toTime(b.date,b.time));
   past.sort((a,b)=>toTime(b.date,b.time)-toTime(a.date,a.time));
   return [up, past];
 }
-
 function fmtDate(dateStr){
-  try{
-    const d = new Date(dateStr);
-    return d.toLocaleDateString(undefined, { weekday:"short", year:"numeric", month:"short", day:"numeric" });
-  }catch{ return dateStr }
+  try{ const d = new Date(dateStr); return d.toLocaleDateString(undefined, { weekday:"short", year:"numeric", month:"short", day:"numeric" }); }
+  catch{ return dateStr }
 }
-
 function statusChip(status){
   const s = String(status || "").toLowerCase();
   let cls = "cd-chip", label = "Confirmed";
   if (s === "completed") { cls += " cd-chip--ok"; label = "Completed"; }
-  else if (s === "pending") { cls += " cd-chip"; label = "Pending"; }
+  else if (s === "pending") { label = "Pending"; }
   else if (s === "cancelled" || s === "canceled") { cls += " cd-chip--err"; label = "Cancelled"; }
-  else { cls += " cd-chip"; label = s ? capitalize(s) : "Confirmed"; }
+  else { label = s ? s[0].toUpperCase()+s.slice(1) : "Confirmed"; }
   return <span className={cls} aria-label={`status: ${label}`}>{label}</span>;
 }
-function capitalize(s){ return s.charAt(0).toUpperCase() + s.slice(1); }
-
-function canCancel(a){
-  const t = toTime(a.date, a.time);
-  return t > Date.now() && !/cancel/i.test(a.status) && !/completed/i.test(a.status);
-}
-function canReschedule(a){
-  const t = toTime(a.date, a.time);
-  return t > Date.now() && !/completed/i.test(a.status);
-}
-
-/* Small skeleton while loading */
+function canCancel(a){ const t = toTime(a.date, a.time); return t > Date.now() && !/cancel/i.test(a.status) && !/completed/i.test(a.status); }
+function canReschedule(a){ const t = toTime(a.date, a.time); return t > Date.now() && !/completed/i.test(a.status); }
 function DashboardSkeleton(){
   return (
     <div aria-hidden="true">
       <div className="cd-skel" style={{height:18, marginBottom:10, width:"45%"}}/>
       {[...Array(5)].map((_,i)=>(
         <div key={i} style={{display:"grid", gridTemplateColumns:"1.2fr .6fr 1fr 1fr .8fr 1fr", gap:10, alignItems:"center", margin:"10px 0"}}>
-          <div className="cd-skel" />
-          <div className="cd-skel" />
-          <div className="cd-skel" />
-          <div className="cd-skel" />
-          <div className="cd-skel" />
-          <div className="cd-skel" />
+          <div className="cd-skel" /><div className="cd-skel" /><div className="cd-skel" />
+          <div className="cd-skel" /><div className="cd-skel" /><div className="cd-skel" />
         </div>
       ))}
     </div>

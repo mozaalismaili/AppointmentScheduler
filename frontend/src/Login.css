@@ -1,0 +1,52 @@
+/* Reuses global tokens/classes from BookingPage.css */
+:root{
+  /* if BookingPage.css is already loaded, these exist; keeping for safety */
+  --bp-bg:#0b1220; --bp-card:#ffffff; --bp-text:#0f172a; --bp-muted:#64748b;
+  --bp-ring:#60a5fa; --bp-accent:#2563eb; --bp-accent-2:#60a5fa;
+  --bp-error:#b91c1c; --bp-ok-bg:#ecfdf5; --bp-ok-text:#065f46;
+  --bp-err-bg:#fef2f2; --bp-err-text:#991b1b;
+}
+
+.lg-header h1{ color:#fff; font-size:28px; margin:0 0 6px }
+.lg-header p{ color:#cbd5e1; margin:0 0 18px }
+
+/* Wider, centered card with consistent padding & shadow */
+.lg-card{
+  width: 440px;            /* was narrow; bumped up */
+  max-width: 92%;          /* responsive on small screens */
+  margin: 16px auto;       /* center horizontally */
+  padding: 22px;           /* match other cards */
+  border-radius: 18px;     /* same rounded look */
+  box-shadow: 0 10px 35px rgba(2,6,23,.35);
+  background: var(--bp-card);
+}
+
+/* On larger screens, make it a bit wider for balance */
+@media (min-width: 1200px){
+  .lg-card{ width: 520px; }
+}
+
+.lg-form{ display:grid; gap:14px }
+
+/* Make inputs/selects/buttons stretch evenly */
+.lg-form .bp-input,
+.lg-form .bp-select,
+.lg-form .bp-textarea,
+.lg-form .bp-btn{ width:100%; }
+
+/* Password reveal button */
+.lg-password{ position:relative }
+.lg-eye{
+  position:absolute; right:10px; top:50%; transform:translateY(-50%);
+  border:0; background:transparent; cursor:pointer; font-size:18px;
+}
+
+/* Row with remember me + hint */
+.lg-row{ display:flex; align-items:center; justify-content:space-between; gap:10px }
+.lg-remember{ display:flex; align-items:center; gap:8px; color:var(--bp-text); font-weight:600 }
+.lg-hint{ font-size:12px; color:var(--bp-muted) }
+
+/* Optional: add a little top spacing under header so the card isn’t stuck to the edge */
+@media (min-width: 720px){
+  .lg-header{ margin-top: 12px; }
+}
