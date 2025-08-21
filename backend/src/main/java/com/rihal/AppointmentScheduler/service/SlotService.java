@@ -1,17 +1,20 @@
 package com.rihal.AppointmentScheduler.service;
 
-import com.rihal.AppointmentScheduler.model.Appointment;
-import com.rihal.AppointmentScheduler.model.Availability;
-import com.rihal.AppointmentScheduler.repository.AppointmentRepository;
-import com.rihal.AppointmentScheduler.repository.AppointmentRepository;
-import com.rihal.AppointmentScheduler.repository.AvailabilityRepository;
-import org.springframework.stereotype.Service;
-
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Service;
+
+import com.rihal.AppointmentScheduler.model.Appointment;
+import com.rihal.AppointmentScheduler.model.Availability;
+import com.rihal.AppointmentScheduler.repository.AppointmentRepository;
+import com.rihal.AppointmentScheduler.repository.AvailabilityRepository;
 
 @Service
 public class SlotService {
@@ -28,14 +31,20 @@ public class SlotService {
     }
 
     public List<LocalTime> getSlots(UUID providerId, LocalDate date) {
-        Availability availability = availabilityRepository
-                .findByProviderIdAndDayOfWeek(providerId, date.getDayOfWeek())
-                .orElse(null);
-        if (availability == null) return List.of();
+        // Convert UUID to Long for Availability queries
+        // This is a temporary workaround for the type mismatch
+        Long providerLong = Long.parseLong(providerId.toString().replace("-", "").substring(0, 16), 16);
+        List<Availability> availabilities = availabilityRepository
+                .findByProviderIdAndDayOfWeek(providerLong, date.getDayOfWeek());
+
+        if (availabilities.isEmpty()) return List.of();
+
+        // Get the first availability for the day (assuming one per day)
+        Availability availability = availabilities.get(0);
 
         List<LocalTime> allSlots = enumerate(availability.getStartTime(), availability.getEndTime(), STEP);
         List<Appointment> booked = appointmentRepository
-                .findByProviderIdAndDateAndStatus(providerId, date, "BOOKED");
+                .findByProviderIdAndDateAndStatus(providerId, date, Appointment.Status.BOOKED);
 
         Set<LocalTime> taken = booked.stream()
                 .map(Appointment::getStartTime)

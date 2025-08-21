@@ -1,105 +1,64 @@
-import React, { useMemo, useState } from "react";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
+import React, { useEffect, useMemo, useState } from "react";
 import "./BookingPage.css";
+import { getAvailability, createBooking } from "./api";
 
-// --- Schema ---
-const phoneRegex = /^(\+?\d[\d\s-]{7,15})$/;
-const BookingSchema = z.object({
-  service: z.string().min(1, "Select a service"),
-  date: z.string().min(1, "Pick a date"),
-  time: z.string().min(1, "Pick a time"),
-  name: z.string().min(2, "Name is too short"),
-  phone: z.string().min(7, "Phone is too short").regex(phoneRegex, "Enter a valid phone number"),
-  notes: z.string().max(500, "Max 500 characters").optional(),
-  company: z.string().optional(), // honeypot
-});
+export default function BookingPage() {
+  const [date, setDate] = useState(() => new Date().toISOString().slice(0,10));
+  const [service, setService] = useState("Consultation");
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [notes, setNotes] = useState("");
+  const [slots, setSlots] = useState([]);     // all available times
+  const [booked, setBooked] = useState([]);   // times already taken
+  const [time, setTime] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [banner, setBanner] = useState({ kind:"", text:"" });
 
-// --- Utils ---
-function getApiBaseUrl(explicit) {
-  if (explicit) return explicit;
-  try {
-    if (typeof import.meta !== "undefined" && import.meta.env?.VITE_API_BASE_URL) {
-      return import.meta.env.VITE_API_BASE_URL;
+  const todayKey = useMemo(()=> new Date().toISOString().slice(0,10), []);
+
+  async function loadAvailability(dKey){
+    setBanner({ kind:"", text:"" });
+    try{
+      const data = await getAvailability(dKey);
+      // normalize multiple shapes:
+      // { slots, booked } | { available, unavailable } | { times: [{time,available}] }
+      if (Array.isArray(data?.times)) {
+        setSlots(data.times.filter(t=>t.available !== false).map(t=>t.time));
+        setBooked(data.times.filter(t=>t.available === false).map(t=>t.time));
+      } else {
+        setSlots(data.slots || data.available || []);
+        setBooked(data.booked || data.unavailable || []);
+      }
+      setTime("");
+    }catch{
+      // fallback local slots 09:00-17:00
+      const all = genSlots("09:00","17:00",30);
+      setSlots(all);
+      setBooked([]); // nothing booked in mock
+      setBanner({ kind:"success", text:"Demo availability (backend not connected)" });
+      setTime("");
     }
-    if (typeof process !== "undefined" && process.env?.REACT_APP_API_BASE_URL) {
-      return process.env.REACT_APP_API_BASE_URL;
-    }
-  } catch {}
-  return "/api";
-}
-function toLocalMinDateStr() {
-  const d = new Date();
-  d.setHours(0, 0, 0, 0);
-  return d.toISOString().slice(0, 10);
-}
-function isPastDateTime(dateStr, timeStr) {
-  try {
-    const [h, m] = timeStr.split(":").map(Number);
-    const dt = new Date(`${dateStr}T${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:00`);
-    return dt.getTime() < Date.now();
-  } catch { return false; }
-}
-async function createBooking(apiBaseUrl, payload, idempotencyKey) {
-  const res = await fetch(`${apiBaseUrl}/bookings`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", "X-Idempotency-Key": idempotencyKey },
-    body: JSON.stringify(payload),
-  });
-  if (!res.ok) {
-    let msg = "";
-    try { const data = await res.json(); msg = data?.message || data?.error || ""; } catch {}
-    throw new Error(msg || `Request failed (${res.status})`);
   }
-  return res.json();
-}
-function newIdempotencyKey() {
-  return (Date.now().toString(36) + Math.random().toString(36).slice(2, 10)).toUpperCase();
-}
 
-// --- Component ---
-export default function BookingPage({ services = ["Consultation", "Follow-up", "Support"], apiBaseUrl }) {
-  const minDate = toLocalMinDateStr();
-  const resolvedApi = useMemo(() => getApiBaseUrl(apiBaseUrl), [apiBaseUrl]);
-  const [banner, setBanner] = useState({ kind: "success", text: "" });
+  useEffect(()=>{ loadAvailability(date); }, [date]);
 
-  const { register, handleSubmit, watch, reset, formState: { errors, isSubmitting } } = useForm({
-    resolver: zodResolver(BookingSchema),
-    defaultValues: { service: "", date: "", time: "", name: "", phone: "", notes: "", company: "" },
-    mode: "onBlur",
-  });
+  const disabled = (t) => booked.includes(t) || (date === todayKey && t <= nowHHMM());
+  const canSubmit = service && name && phone && date && time && !disabled(time);
 
-  const dateVal = watch("date");
-  const todaySelected = dateVal === minDate;
-
-  async function onSubmit(values) {
-    setBanner({ kind: "success", text: "" });
-
-    // honeypot
-    if (values.company && values.company.trim() !== "") {
-      reset();
-      setBanner({ kind: "success", text: "Thanks! We will confirm your booking shortly." });
-      return;
-    }
-
-    if (values.date && values.time && isPastDateTime(values.date, values.time)) {
-      setBanner({ kind: "error", text: "Selected time is in the past. Please pick a future time." });
-      return;
-    }
-
-    const payload = {
-      service: values.service, date: values.date, time: values.time,
-      name: values.name, phone: values.phone, notes: values.notes || undefined,
-    };
-
-    try {
-      const idKey = newIdempotencyKey();
-      const data = await createBooking(resolvedApi, payload, idKey);
-      reset();
-      setBanner({ kind: "success", text: data?.message || "✅ Booking created! We’ll contact you soon." });
-    } catch (err) {
-      setBanner({ kind: "error", text: err.message || "Could not submit. Try again." });
+  async function submit(e){
+    e.preventDefault();
+    if (!canSubmit) return;
+    try{
+      setBusy(true);
+      await createBooking({ service, date, time, name, phone, notes });
+      setBanner({ kind:"success", text:"✅ Booking created!" });
+      setBooked(b => [...b, time]); // block chosen time locally
+      setTime("");
+      setNotes("");
+    }catch(err){
+      setBanner({ kind:"error", text: err.message || "Booking failed" });
+    }finally{
+      setBusy(false);
     }
   }
 
@@ -108,103 +67,94 @@ export default function BookingPage({ services = ["Consultation", "Follow-up", "
       <div className="bp-decor-1" />
       <div className="bp-decor-2" />
 
-      <main className="bp-shell" aria-live="polite">
+      <main className="bp-shell">
         <header className="bp-header">
           <h1>Book an Appointment</h1>
-          <p>Pick a service, choose a time, and tell us how to reach you.</p>
+          <p>Select a date and time, then confirm your details.</p>
         </header>
 
         {banner.text && (
-          <div className={`bp-banner ${banner.kind === "error" ? "bp-banner--error" : "bp-banner--ok"}`}>
+          <div className={`bp-banner ${banner.kind === "error" ? "bp-banner--err" : "bp-banner--ok"}`}>
             {banner.text}
           </div>
         )}
 
-        <section className="bp-card" aria-labelledby="form-title">
-          <h2 id="form-title" className="sr-only">Booking form</h2>
-
-          <form className="bp-form" onSubmit={handleSubmit(onSubmit)} noValidate>
-            {/* Service */}
-            <div className="bp-field">
-              <label htmlFor="service" className="bp-label">
-                <span className="bp-ico" aria-hidden>🛎️</span> Service
-              </label>
-              <select id="service" className="bp-select" {...register("service")} aria-invalid={!!errors.service}>
-                <option value="">Select…</option>
-                {services.map(s => <option key={s} value={s}>{s}</option>)}
-              </select>
-              {errors.service && <p className="bp-error">{errors.service.message}</p>}
-            </div>
-
-            {/* Date & Time */}
+        <section className="bp-card">
+          <form className="bp-form" onSubmit={submit} noValidate>
             <div className="bp-row">
-              <div className="bp-field">
-                <label htmlFor="date" className="bp-label">
-                  <span className="bp-ico" aria-hidden>📅</span> Date
-                </label>
-                <input id="date" type="date" min={minDate} className="bp-input" {...register("date")} aria-invalid={!!errors.date} />
-                {errors.date && <p className="bp-error">{errors.date.message}</p>}
+              <div>
+                <label className="bp-label" htmlFor="service">Service</label>
+                <select id="service" className="bp-select" value={service} onChange={e=>setService(e.target.value)}>
+                  <option>Consultation</option>
+                  <option>Follow-up</option>
+                  <option>Support</option>
+                </select>
               </div>
-
-              <div className="bp-field">
-                <label htmlFor="time" className="bp-label">
-                  <span className="bp-ico" aria-hidden>⏰</span> Time
-                </label>
-                <input
-                  id="time"
-                  type="time"
-                  step={1800}
-                  className="bp-input"
-                  {...register("time")}
-                  aria-invalid={!!errors.time}
-                  min={todaySelected ? new Date().toTimeString().slice(0,5) : undefined}
-                />
-                {errors.time && <p className="bp-error">{errors.time.message}</p>}
-                <p className="bp-hint">We book in 30-minute slots.</p>
+              <div>
+                <label className="bp-label" htmlFor="date">Date</label>
+                <input id="date" className="bp-input" type="date" value={date} min={todayKey} onChange={e=>setDate(e.target.value)} />
               </div>
             </div>
 
-            {/* Contact */}
+            <div>
+              <label className="bp-label">Time</label>
+              <div className="bp-times">
+                {slots.length === 0 ? (
+                  <div className="bp-empty">No slots for this date.</div>
+                ) : (
+                  slots.map(t => (
+                    <button key={t} type="button"
+                      className={`bp-chip ${time===t ? "bp-chip--active":""}`}
+                      disabled={disabled(t)}
+                      onClick={()=> setTime(t)}>
+                      {t}
+                    </button>
+                  ))
+                )}
+              </div>
+            </div>
+
             <div className="bp-row">
-              <div className="bp-field">
-                <label htmlFor="name" className="bp-label">
-                  <span className="bp-ico" aria-hidden>👤</span> Full Name
-                </label>
-                <input id="name" type="text" placeholder="Your name" className="bp-input" {...register("name")} aria-invalid={!!errors.name} />
-                {errors.name && <p className="bp-error">{errors.name.message}</p>}
+              <div>
+                <label className="bp-label" htmlFor="name">Full name</label>
+                <input id="name" className="bp-input" value={name} onChange={e=>setName(e.target.value)} placeholder="Your name" />
               </div>
-              <div className="bp-field">
-                <label htmlFor="phone" className="bp-label">
-                  <span className="bp-ico" aria-hidden>📱</span> Phone
-                </label>
-                <input id="phone" type="tel" placeholder="+968…" className="bp-input" {...register("phone")} aria-invalid={!!errors.phone} />
-                {errors.phone && <p className="bp-error">{errors.phone.message}</p>}
-                <p className="bp-hint">We’ll use this to confirm your booking.</p>
+              <div>
+                <label className="bp-label" htmlFor="phone">Phone</label>
+                <input id="phone" className="bp-input" value={phone} onChange={e=>setPhone(e.target.value)} placeholder="+968 ..." />
               </div>
             </div>
 
-            {/* Notes */}
-            <div className="bp-field">
-              <label htmlFor="notes" className="bp-label">
-                <span className="bp-ico" aria-hidden>📝</span> Notes (optional)
-              </label>
-              <textarea id="notes" placeholder="Anything we should know?" className="bp-textarea" {...register("notes")} />
+            <div>
+              <label className="bp-label" htmlFor="notes">Notes (optional)</label>
+              <textarea id="notes" className="bp-textarea" value={notes} onChange={e=>setNotes(e.target.value)} placeholder="Any extra details…" />
             </div>
 
-            {/* Honeypot */}
-            <div aria-hidden="true" className="sr-only">
-              <label>Company <input type="text" tabIndex={-1} autoComplete="off" {...register("company")} /></label>
-            </div>
-
-            <button type="submit" className={`bp-btn ${isSubmitting ? "bp-btn--busy" : ""}`} disabled={isSubmitting}>
+            <button className={`bp-btn ${busy ? "bp-btn--busy":""}`} disabled={!canSubmit || busy} type="submit">
               <span className="bp-btn__spinner" aria-hidden />
-              {isSubmitting ? "Submitting…" : "Confirm Booking"}
+              {busy ? "Booking…" : "Confirm booking"}
             </button>
-
-            <p className="bp-terms">By confirming, you agree to our appointment policy. You’ll receive a confirmation by SMS/WhatsApp.</p>
           </form>
         </section>
       </main>
     </div>
   );
+}
+
+/* helpers */
+function genSlots(start="09:00", end="17:00", step=30){
+  const [sh, sm] = start.split(":").map(Number);
+  const [eh, em] = end.split(":").map(Number);
+  const from = sh*60+sm, to = eh*60+em;
+  const out = [];
+  for(let m=from; m<to; m+=step){
+    const h = String(Math.floor(m/60)).padStart(2,"0");
+    const mm = String(m%60).padStart(2,"0");
+    out.push(`${h}:${mm}`);
+  }
+  return out;
+}
+function nowHHMM(){
+  const d = new Date();
+  return `${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`;
 }

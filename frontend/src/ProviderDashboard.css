@@ -1,0 +1,118 @@
+/* Use the same tokens used by other pages (bp- theme) */
+:root{
+  --bp-bg:#0b1220; --bp-card:#ffffff; --bp-text:#0f172a; --bp-muted:#64748b;
+  --bp-ring:#60a5fa; --bp-accent:#2563eb; --bp-accent-2:#60a5fa;
+  --bp-border:#e2e8f0; --bp-shadow:0 10px 35px rgba(2,6,23,.35);
+  --pd-chip-info:#e0e7ff; --pd-chip-info-text:#1e3a8a;
+  --pd-chip-ok:#dcfce7; --pd-chip-ok-text:#065f46;
+  --pd-chip-warn:#fff7ed; --pd-chip-warn-text:#9a3412;
+  --pd-chip-err:#fee2e2; --pd-chip-err-text:#7f1d1d;
+}
+
+.pd-bg{ min-height:100vh; position:relative; overflow:hidden }
+.pd-shell{ max-width:1200px; margin:0 auto; padding:32px 16px }
+
+/* Header */
+.pd-header{
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+  margin-bottom:14px;
+}
+.pd-header h1{ color:#fff; margin:0 0 6px; font-size:28px }
+.pd-header p{ color:#cbd5e1; margin:0 }
+
+.pd-tools{ display:flex; align-items:center; gap:8px }
+.pd-btn{
+  appearance:none; border:0; border-radius:12px; padding:9px 12px; font-weight:800;
+  background:linear-gradient(135deg,var(--bp-accent),var(--bp-accent-2));
+  color:#fff; box-shadow:0 8px 16px rgba(59,130,246,.35), 0 2px 0 rgba(59,130,246,.4) inset;
+  cursor:pointer; transition:transform .06s ease, filter .2s ease;
+}
+.pd-btn:hover{ transform: translateY(-1px); filter:saturate(110%) }
+
+.pd-nav{ display:flex; gap:6px }
+.pd-icon{
+  border:1px solid rgba(148,163,184,.35);
+  background:rgba(148,163,184,.12);
+  color:#e2e8f0;
+  border-radius:10px; width:36px; height:36px; line-height:36px; text-align:center;
+  font-weight:800; cursor:pointer;
+}
+
+/* Layout */
+.pd-grid{
+  display:grid; grid-template-columns: 1.65fr 1fr; gap:16px;
+}
+@media (max-width: 1024px){ .pd-grid{ grid-template-columns: 1fr } }
+
+.bp-card.pd-card{
+  background:var(--bp-card);
+  border-radius:18px;
+  box-shadow:var(--bp-shadow);
+  padding:18px;
+}
+.pd-card--calendar{ padding:10px; overflow:hidden }
+
+/* Right column */
+.pd-side{ display:flex; flex-direction:column; gap:16px; position:sticky; top:16px }
+
+/* Section headers inside cards */
+.pd-section-head{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:8px }
+.pd-section-head h2{ margin:0; font-size:18px; color:var(--bp-text) }
+.pd-date{ font-weight:700; color:#0f172a }
+
+/* Lists */
+.pd-list{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:10px }
+.pd-item{
+  display:grid; grid-template-columns: 86px 1fr auto; align-items:center; gap:10px;
+  border:1px solid var(--bp-border); border-radius:12px; padding:10px 12px; background:#f8fafc;
+}
+.pd-item--compact{ grid-template-columns: 110px 92px 1fr auto }
+.pd-time, .pd-date{ font-variant-numeric: tabular-nums; color:#0f172a }
+.pd-title{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:#334155 }
+
+/* Chips */
+.pd-chip{
+  display:inline-flex; align-items:center; gap:6px;
+  padding:4px 10px; border-radius:999px; font-weight:700; font-size:12px;
+}
+.pd-chip.pd-chip--info{ background:var(--pd-chip-info); color:var(--pd-chip-info-text) }
+.pd-chip.pd-chip--ok{ background:var(--pd-chip-ok); color:var(--pd-chip-ok-text) }
+.pd-chip.pd-chip--warn{ background:var(--pd-chip-warn); color:var(--pd-chip-warn-text) }
+.pd-chip.pd-chip--err{ background:var(--pd-chip-err); color:var(--pd-chip-err-text) }
+
+/* Loading badge on calendar */
+.pd-loading{
+  position:absolute; right:12px; top:12px; padding:6px 10px; border-radius:10px;
+  background:#e2e8f0; border:1px solid #cbd5e1; color:#0f172a; font-weight:700; font-size:12px;
+}
+
+/* Optional: make Calendar’s container blend with the card */
+.pd-card--calendar .calendar{ /* if your Calendar root has 'calendar' class */
+  background:transparent !important;
+  border:0 !important;
+}
+
+/* existing variables from earlier version remain the same */
+
+.pd-banner{
+  margin: 0 0 12px;
+  background: var(--bp-ok-bg);
+  color: var(--bp-ok-text);
+  border: 1px solid #bbf7d0;
+  border-radius: 12px;
+  padding: 10px 12px;
+  font-weight: 700;
+}
+
+/* action buttons inside list items */
+.pd-actions{ display:flex; gap:8px; align-items:center; justify-content:flex-end; flex-wrap:wrap }
+.pd-btn.pd-btn--ghost{
+  background:#fff; color:#0f172a; border:1px solid var(--bp-border);
+  box-shadow:none;
+}
+.pd-btn.pd-btn--danger{
+  background: linear-gradient(135deg,#dc2626,#ef4444);
+  box-shadow: 0 8px 16px rgba(239,68,68,.35), 0 2px 0 rgba(239,68,68,.4) inset;
+  color:#fff;
+}
+.pd-btn.pd-btn--danger:hover{ transform: translateY(-1px); filter:saturate(110%) }

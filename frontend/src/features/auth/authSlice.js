@@ -13,12 +13,12 @@ const authSlice = createSlice({
       state.email = payload.email;
       state.id = payload.id;   // ✅ store user ID
     },
-    logout: (s) => {
-      s.token = null;
-      s.role = null;
-      s.name = null;
-      s.email = null;
-      s.id = null;
+    logout: (state) => {
+      state.token = null;
+      state.role = null;
+      state.name = null;
+      state.email = null;
+      state.id = null;
     },
   },
 });
