@@ -1,0 +1,370 @@
+export const translations = {
+  en: {
+    // Common
+    loading: 'Loading...',
+    save: 'Save',
+    cancel: 'Cancel',
+    back: 'Back',
+    edit: 'Edit',
+    delete: 'Delete',
+    confirm: 'Confirm',
+    close: 'Close',
+    
+    // Navigation
+    dashboard: 'Dashboard',
+    availability: 'Availability',
+    appointments: 'Appointments',
+    bookAppointment: 'Book Appointment',
+    profile: 'Profile',
+    settings: 'Settings',
+    logout: 'Logout',
+    login: 'Login',
+    user: 'User',
+    
+    // Availability Page
+    manageAvailability: 'Manage Your Availability',
+    setWorkingHours: 'Set your working hours and available time slots for each day',
+    backToDashboard: '← Back to Dashboard',
+    workingHours: 'Working Hours',
+    breakTime: 'Break Time',
+    availableTimeSlots: 'Available Time Slots',
+    selectTimeSlots: 'Select the specific time slots you want to be available for bookings',
+    startTime: 'Start Time',
+    endTime: 'End Time',
+    breakStart: 'Break Start',
+    breakEnd: 'Break End',
+    available: 'Available',
+    notAvailable: 'Not Available',
+    unavailableMessage: 'You are not available on {day}',
+    saveAvailability: 'Save Availability',
+    saving: 'Saving...',
+    availabilityUpdated: 'Availability updated successfully!',
+    
+    // Days
+    monday: 'Monday',
+    tuesday: 'Tuesday',
+    wednesday: 'Wednesday',
+    thursday: 'Thursday',
+    friday: 'Friday',
+    saturday: 'Saturday',
+    sunday: 'Sunday',
+    
+    // Time slots
+    '8:00 AM': '8:00 AM',
+    '8:30 AM': '8:30 AM',
+    '9:00 AM': '9:00 AM',
+    '9:30 AM': '9:30 AM',
+    '10:00 AM': '10:00 AM',
+    '10:30 AM': '10:30 AM',
+    '11:00 AM': '11:00 AM',
+    '11:30 AM': '11:30 AM',
+    '12:00 PM': '12:00 PM',
+    '12:30 PM': '12:30 PM',
+    '1:00 PM': '1:00 PM',
+    '1:30 PM': '1:30 PM',
+    '2:00 PM': '2:00 PM',
+    '2:30 PM': '2:30 PM',
+    '3:00 PM': '3:00 PM',
+    '3:30 PM': '3:30 PM',
+    '4:00 PM': '4:00 PM',
+    '4:30 PM': '4:30 PM',
+    '5:00 PM': '5:00 PM',
+    '5:30 PM': '5:30 PM',
+    '6:00 PM': '6:00 PM',
+    '6:30 PM': '6:30 PM',
+    '7:00 PM': '7:00 PM',
+    '7:30 PM': '7:30 PM',
+    
+    // Theme
+    lightTheme: 'Light Theme',
+    darkTheme: 'Dark Theme',
+    toggleTheme: 'Toggle Theme',
+    
+    // Language
+    english: 'English',
+    arabic: 'العربية',
+    changeLanguage: 'Change Language',
+    
+    // User Roles
+    customer: 'Customer',
+    provider: 'Service Provider',
+    admin: 'Administrator',
+    
+    // Dashboard Content
+    welcomeBack: 'Welcome back, {name}!',
+    manageSchedule: 'Manage your schedule, view bookings, and update availability',
+    manageAppointments: 'Manage your appointments and book new services',
+    manageAvailability: 'Manage Availability',
+    viewAllBookings: 'View All Bookings',
+    bookNewAppointment: 'Book New Appointment',
+    totalBookings: 'Total Bookings',
+    completedToday: 'Completed Today',
+    pendingApproval: 'Pending Approval',
+    revenue: 'Revenue',
+    overview: 'Overview',
+    bookings: 'Bookings',
+    availability: 'Availability',
+    todaysBookings: 'Today\'s Bookings',
+    quickActions: 'Quick Actions',
+    updateAvailability: 'Update Availability',
+    viewCalendar: 'View Calendar',
+    generateReport: 'Generate Report',
+    allBookings: 'All Bookings',
+    allStatus: 'All Status',
+    confirmed: 'Confirmed',
+    pending: 'Pending',
+    completed: 'Completed',
+    cancelled: 'Cancelled',
+    yourAvailability: 'Your Availability',
+    editAvailability: 'Edit Availability',
+    noBookingsToday: 'No bookings for today',
+    noUpcomingAppointments: 'No upcoming appointments',
+    noPendingAppointments: 'No pending appointments',
+    noPastAppointments: 'No past appointments',
+    bookFirstAppointment: 'Book Your First Appointment',
+    upcoming: 'Upcoming',
+    past: 'Past',
+    viewDetails: 'View Details',
+    markComplete: 'Mark Complete',
+    cancel: 'Cancel',
+    reschedule: 'Reschedule',
+    loadingDashboard: 'Loading your dashboard...',
+    loadingAppointments: 'Loading your appointments...',
+    
+    // Booking Page
+    selectService: 'Select Service',
+    chooseProvider: 'Choose Provider',
+    pickDate: 'Pick Date',
+    selectTime: 'Select Time',
+    confirmBooking: 'Confirm Booking',
+    bookAppointment: 'Book Appointment',
+    whatService: 'What service would you like to book?',
+    whoBookWith: 'Who would you like to book with?',
+    whenBook: 'When would you like to book?',
+    whatTime: 'What time works best for you?',
+    confirmYourBooking: 'Confirm Your Booking',
+    service: 'Service',
+    provider: 'Provider',
+    date: 'Date',
+    time: 'Time',
+    total: 'Total',
+    confirmBookingBtn: 'Confirm Booking',
+    booking: 'Booking...',
+    loadingTimes: 'Loading available times...',
+    appointmentBooked: 'Appointment booked successfully!',
+    minutes: 'minutes',
+    specialty: 'Specialty',
+    rating: 'Rating',
+    
+    // Detail Labels
+    serviceLabel: 'Service',
+    providerLabel: 'Provider',
+    dateLabel: 'Date',
+    timeLabel: 'Time',
+    
+    // Back Button
+    back: 'Back',
+    
+    // Mock Data (Service Names)
+    hairCut: 'Hair Cut',
+    manicure: 'Manicure',
+    pedicure: 'Pedicure',
+    hairColoring: 'Hair Coloring',
+    hairStyling: 'Hair Styling',
+    nailCare: 'Nail Care',
+    
+    // Auth Form
+    welcomeBack: 'Welcome Back',
+    createAccount: 'Create Account'
+  },
+  
+  ar: {
+    // Common
+    loading: 'جاري التحميل...',
+    save: 'حفظ',
+    cancel: 'إلغاء',
+    back: 'رجوع',
+    edit: 'تعديل',
+    delete: 'حذف',
+    confirm: 'تأكيد',
+    close: 'إغلاق',
+    
+    // Navigation
+    dashboard: 'لوحة التحكم',
+    availability: 'المواعيد المتاحة',
+    appointments: 'المواعيد',
+    bookAppointment: 'حجز موعد',
+    profile: 'الملف الشخصي',
+    settings: 'الإعدادات',
+    logout: 'تسجيل الخروج',
+    login: 'تسجيل الدخول',
+    user: 'المستخدم',
+    
+    // Availability Page
+    manageAvailability: 'إدارة المواعيد المتاحة',
+    setWorkingHours: 'حدد ساعات العمل والمواعيد المتاحة لكل يوم',
+    backToDashboard: '← العودة إلى لوحة التحكم',
+    workingHours: 'ساعات العمل',
+    breakTime: 'وقت الراحة',
+    availableTimeSlots: 'المواعيد المتاحة',
+    selectTimeSlots: 'اختر المواعيد المحددة التي تريد أن تكون متاحاً للحجوزات',
+    startTime: 'وقت البداية',
+    endTime: 'وقت النهاية',
+    breakStart: 'بداية الراحة',
+    breakEnd: 'نهاية الراحة',
+    available: 'متاح',
+    notAvailable: 'غير متاح',
+    unavailableMessage: 'أنت غير متاح في {day}',
+    saveAvailability: 'حفظ المواعيد المتاحة',
+    saving: 'جاري الحفظ...',
+    availabilityUpdated: 'تم تحديث المواعيد المتاحة بنجاح!',
+    
+    // Days
+    monday: 'الاثنين',
+    tuesday: 'الثلاثاء',
+    wednesday: 'الأربعاء',
+    thursday: 'الخميس',
+    friday: 'الجمعة',
+    saturday: 'السبت',
+    sunday: 'الأحد',
+    
+    // Time slots
+    '8:00 AM': '8:00 ص',
+    '8:30 AM': '8:30 ص',
+    '9:00 AM': '9:00 ص',
+    '9:30 AM': '9:30 ص',
+    '10:00 AM': '10:00 ص',
+    '10:30 AM': '10:30 ص',
+    '11:00 AM': '11:00 ص',
+    '11:30 AM': '11:30 ص',
+    '12:00 PM': '12:00 م',
+    '12:30 PM': '12:30 م',
+    '1:00 PM': '1:00 م',
+    '1:30 PM': '1:30 م',
+    '2:00 PM': '2:00 م',
+    '2:30 PM': '2:30 م',
+    '3:00 PM': '3:00 م',
+    '3:30 PM': '3:30 م',
+    '4:00 PM': '4:00 م',
+    '4:30 PM': '4:30 م',
+    '5:00 PM': '5:00 م',
+    '5:30 PM': '5:30 م',
+    '6:00 PM': '6:00 م',
+    '6:30 PM': '6:30 م',
+    '7:00 PM': '7:00 م',
+    '7:30 PM': '7:30 م',
+    
+    // Theme
+    lightTheme: 'المظهر الفاتح',
+    darkTheme: 'المظهر الداكن',
+    toggleTheme: 'تبديل المظهر',
+    
+    // Language
+    english: 'English',
+    arabic: 'العربية',
+    changeLanguage: 'تغيير اللغة',
+    
+    // User Roles
+    customer: 'العميل',
+    provider: 'مقدم الخدمة',
+    admin: 'المدير',
+    
+    // Dashboard Content
+    welcomeBack: 'مرحباً بعودتك، {name}!',
+    manageSchedule: 'إدارة جدولك، عرض الحجوزات، وتحديث التوفر',
+    manageAppointments: 'إدارة مواعيدك وحجز خدمات جديدة',
+    manageAvailability: 'إدارة التوفر',
+    viewAllBookings: 'عرض جميع الحجوزات',
+    bookNewAppointment: 'حجز موعد جديد',
+    totalBookings: 'إجمالي الحجوزات',
+    completedToday: 'مكتمل اليوم',
+    pendingApproval: 'في انتظار الموافقة',
+    revenue: 'الإيرادات',
+    overview: 'نظرة عامة',
+    bookings: 'الحجوزات',
+    availability: 'التوفر',
+    todaysBookings: 'حجوزات اليوم',
+    quickActions: 'إجراءات سريعة',
+    updateAvailability: 'تحديث التوفر',
+    viewCalendar: 'عرض التقويم',
+    generateReport: 'إنشاء تقرير',
+    allBookings: 'جميع الحجوزات',
+    allStatus: 'جميع الحالات',
+    confirmed: 'مؤكد',
+    pending: 'في الانتظار',
+    completed: 'مكتمل',
+    cancelled: 'ملغي',
+    yourAvailability: 'توفرك',
+    editAvailability: 'تعديل التوفر',
+    noBookingsToday: 'لا توجد حجوزات لليوم',
+    noUpcomingAppointments: 'لا توجد مواعيد قادمة',
+    noPendingAppointments: 'لا توجد مواعيد في الانتظار',
+    noPastAppointments: 'لا توجد مواعيد سابقة',
+    bookFirstAppointment: 'احجز موعدك الأول',
+    upcoming: 'قادم',
+    past: 'سابق',
+    viewDetails: 'عرض التفاصيل',
+    markComplete: 'تحديد كمكتمل',
+    cancel: 'إلغاء',
+    reschedule: 'إعادة جدولة',
+    loadingDashboard: 'جاري تحميل لوحة التحكم...',
+    loadingAppointments: 'جاري تحميل مواعيدك...',
+    
+    // Booking Page
+    selectService: 'اختر الخدمة',
+    chooseProvider: 'اختر مقدم الخدمة',
+    pickDate: 'اختر التاريخ',
+    selectTime: 'اختر الوقت',
+    confirmBooking: 'تأكيد الحجز',
+    bookAppointment: 'حجز موعد',
+    whatService: 'ما الخدمة التي تريد حجزها؟',
+    whoBookWith: 'مع من تريد الحجز؟',
+    whenBook: 'متى تريد الحجز؟',
+    whatTime: 'ما الوقت المناسب لك؟',
+    confirmYourBooking: 'تأكيد حجزك',
+    service: 'الخدمة',
+    provider: 'مقدم الخدمة',
+    date: 'التاريخ',
+    time: 'الوقت',
+    total: 'المجموع',
+    confirmBookingBtn: 'تأكيد الحجز',
+    booking: 'جاري الحجز...',
+    loadingTimes: 'جاري تحميل الأوقات المتاحة...',
+    appointmentBooked: 'تم حجز الموعد بنجاح!',
+    minutes: 'دقائق',
+    specialty: 'التخصص',
+    rating: 'التقييم',
+    
+    // Detail Labels
+    serviceLabel: 'الخدمة',
+    providerLabel: 'مقدم الخدمة',
+    dateLabel: 'التاريخ',
+    timeLabel: 'الوقت',
+    
+    // Back Button
+    back: 'رجوع',
+    
+    // Mock Data (Service Names)
+    hairCut: 'قص الشعر',
+    manicure: 'مانيكير',
+    pedicure: 'بديكير',
+    hairColoring: 'صبغ الشعر',
+    hairStyling: 'تسريح الشعر',
+    nailCare: 'العناية بالأظافر',
+    
+    // Auth Form
+    welcomeBack: 'مرحباً بعودتك',
+    createAccount: 'إنشاء حساب'
+  }
+};
+
+export const t = (key, locale = 'en', params = {}) => {
+  let translation = translations[locale]?.[key] || translations.en[key] || key;
+  
+  // Replace parameters like {day} with actual values
+  Object.keys(params).forEach(param => {
+    translation = translation.replace(`{${param}}`, params[param]);
+  });
+  
+  return translation;
+};

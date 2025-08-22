@@ -3,6 +3,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { setCredentials } from '../../features/auth/authSlice';
 import { loginUser, registerUser } from '../../api/auth';
+import { useLocale } from '../../context/LocaleContext';
+import { t } from '../../locales/translations';
 import './AuthForm.css';
 
 export default function AuthForm() {
@@ -22,6 +24,7 @@ export default function AuthForm() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { role } = useSelector((state) => state.auth);
+  const { locale } = useLocale();
 
   // Redirect if user is already authenticated
   useEffect(() => {
@@ -108,14 +111,16 @@ export default function AuthForm() {
       }
 
       // Mock functions return user data directly, not wrapped in success/response object
-      dispatch(setCredentials({
+      const credentials = {
         token: response.token,
         role: response.role,
         name: response.name,
         email: response.email,
         userId: response.id,
         basic: response.basic
-      }));
+      };
+      
+      dispatch(setCredentials(credentials));
       
       setMessage(isLogin ? 'Login successful!' : 'Registration successful!');
       
@@ -145,7 +150,7 @@ export default function AuthForm() {
     <div className="auth-container">
       <div className="auth-card">
         <div className="auth-header">
-          <h1 className="auth-title">{isLogin ? 'Welcome Back' : 'Create Account'}</h1>
+          <h1 className="auth-title">{isLogin ? t('welcomeBack', locale) : t('createAccount', locale)}</h1>
           <p className="auth-subtitle">
             {isLogin 
               ? 'Sign in to your account to continue' 

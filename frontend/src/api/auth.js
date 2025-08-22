@@ -1,10 +1,10 @@
-// Real authentication API functions for Spring Boot backend
+// Production authentication API functions for Spring Boot backend
 // Backend endpoints: /api/auth/login and /api/auth/register
 
-const API_BASE_URL = 'http://localhost:8080/api/auth';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080/api/auth';
 
 /**
- * Real login function that calls the Spring Boot backend
+ * Production login function that calls the Spring Boot backend
  * @param {Object} credentials - User credentials
  * @param {string} credentials.email - User email
  * @param {string} credentials.password - User password
@@ -45,14 +45,14 @@ export const loginUser = async (credentials) => {
     };
   } catch (error) {
     if (error.name === 'TypeError' && error.message.includes('fetch')) {
-      throw new Error('Cannot connect to backend server. Please ensure the backend is running on port 8080.');
+      throw new Error('Cannot connect to backend server. Please ensure the backend is running.');
     }
     throw error;
   }
 };
 
 /**
- * Real registration function that calls the Spring Boot backend
+ * Production registration function that calls the Spring Boot backend
  * @param {Object} userData - User registration data
  * @param {string} userData.name - User's full name
  * @param {string} userData.email - User's email
@@ -114,7 +114,7 @@ export const registerUser = async (userData) => {
     };
   } catch (error) {
     if (error.name === 'TypeError' && error.message.includes('fetch')) {
-      throw new Error('Cannot connect to backend server. Please ensure the backend is running on port 8080.');
+      throw new Error('Cannot connect to backend server. Please ensure the backend is running.');
     }
     throw error;
   }

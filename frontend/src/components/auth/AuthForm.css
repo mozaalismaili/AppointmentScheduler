@@ -189,8 +189,7 @@
 
 .auth-footer p {
   color: #718096;
-  margin: 0;
-  font-size: 1rem;
+  margin: 0 0 16px 0;
 }
 
 .toggle-button {
@@ -205,7 +204,7 @@
 }
 
 .toggle-button:hover {
-  color: #5a8a82;
+  color: #6ba89f;
 }
 
 .toggle-button:disabled {

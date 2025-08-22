@@ -1,24 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import { useLocale } from '../context/LocaleContext';
+import { t } from '../locales/translations';
 import './AvailabilityPage.css';
 
 export default function AvailabilityPage() {
   const { name } = useSelector(state => state.auth);
   const navigate = useNavigate();
+  const { locale } = useLocale();
+  
   const [availability, setAvailability] = useState({});
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [selectedDay, setSelectedDay] = useState('monday');
 
   const daysOfWeek = [
-    { key: 'monday', label: 'Monday' },
-    { key: 'tuesday', label: 'Tuesday' },
-    { key: 'wednesday', label: 'Wednesday' },
-    { key: 'thursday', label: 'Thursday' },
-    { key: 'friday', label: 'Friday' },
-    { key: 'saturday', label: 'Saturday' },
-    { key: 'sunday', label: 'Sunday' }
+    { key: 'monday', label: t('monday', locale) },
+    { key: 'tuesday', label: t('tuesday', locale) },
+    { key: 'wednesday', label: t('wednesday', locale) },
+    { key: 'thursday', label: t('thursday', locale) },
+    { key: 'friday', label: t('friday', locale) },
+    { key: 'saturday', label: t('saturday', locale) },
+    { key: 'sunday', label: t('sunday', locale) }
   ];
 
   const timeSlots = [
@@ -39,24 +43,20 @@ export default function AvailabilityPage() {
       // const response = await getProviderAvailability();
       // setAvailability(response.data);
       
-      // Mock data for now
-      setTimeout(() => {
-        const mockAvailability = {};
-        daysOfWeek.forEach(day => {
-          mockAvailability[day.key] = {
-            isAvailable: day.key !== 'sunday',
-            startTime: '9:00 AM',
-            endTime: '5:00 PM',
-            breakStart: '12:00 PM',
-            breakEnd: '1:00 PM',
-            selectedSlots: timeSlots.filter((_, index) => 
-              index >= 2 && index <= 16 && index !== 6 && index !== 7
-            )
-          };
-        });
-        setAvailability(mockAvailability);
-        setIsLoading(false);
-      }, 1000);
+      // Initialize empty availability for now
+      const emptyAvailability = {};
+      daysOfWeek.forEach(day => {
+        emptyAvailability[day.key] = {
+          isAvailable: false,
+          startTime: '9:00 AM',
+          endTime: '5:00 PM',
+          breakStart: '12:00 PM',
+          breakEnd: '1:00 PM',
+          selectedSlots: []
+        };
+      });
+      setAvailability(emptyAvailability);
+      setIsLoading(false);
     } catch (error) {
       console.error('Error fetching availability:', error);
       setIsLoading(false);
@@ -106,12 +106,11 @@ export default function AvailabilityPage() {
       // TODO: Replace with actual API call
       // await updateProviderAvailability(availability);
       
-      // Mock success
-      setTimeout(() => {
-        alert('Availability updated successfully!');
-        setIsSaving(false);
-        navigate('/provider');
-      }, 1000);
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      alert(t('availabilityUpdated', locale));
+      setIsSaving(false);
     } catch (error) {
       console.error('Error saving availability:', error);
       setIsSaving(false);
@@ -157,34 +156,34 @@ export default function AvailabilityPage() {
               onChange={() => handleDayToggle(selectedDay)}
             />
             <span className="toggle-slider"></span>
-            Available
+            {dayData.isAvailable ? t('available', locale) : t('notAvailable', locale)}
           </label>
         </div>
 
         {dayData.isAvailable && (
           <>
             <div className="time-range-section">
-              <h3>Working Hours</h3>
+              <h3>{t('workingHours', locale)}</h3>
               <div className="time-inputs">
                 <div className="time-input-group">
-                  <label>Start Time</label>
+                  <label>{t('startTime', locale)}</label>
                   <select
                     value={dayData.startTime}
                     onChange={(e) => handleTimeChange(selectedDay, 'startTime', e.target.value)}
                   >
                     {timeSlots.map(slot => (
-                      <option key={slot} value={slot}>{slot}</option>
+                      <option key={slot} value={slot}>{t(slot, locale)}</option>
                     ))}
                   </select>
                 </div>
                 <div className="time-input-group">
-                  <label>End Time</label>
+                  <label>{t('endTime', locale)}</label>
                   <select
                     value={dayData.endTime}
                     onChange={(e) => handleTimeChange(selectedDay, 'endTime', e.target.value)}
                   >
                     {timeSlots.map(slot => (
-                      <option key={slot} value={slot}>{slot}</option>
+                      <option key={slot} value={slot}>{t(slot, locale)}</option>
                     ))}
                   </select>
                 </div>
@@ -192,27 +191,27 @@ export default function AvailabilityPage() {
             </div>
 
             <div className="break-time-section">
-              <h3>Break Time</h3>
+              <h3>{t('breakTime', locale)}</h3>
               <div className="time-inputs">
                 <div className="time-input-group">
-                  <label>Break Start</label>
+                  <label>{t('breakStart', locale)}</label>
                   <select
                     value={dayData.breakStart}
                     onChange={(e) => handleTimeChange(selectedDay, 'breakStart', e.target.value)}
                   >
                     {timeSlots.map(slot => (
-                      <option key={slot} value={slot}>{slot}</option>
+                      <option key={slot} value={slot}>{t(slot, locale)}</option>
                     ))}
                   </select>
                 </div>
                 <div className="time-input-group">
-                  <label>Break End</label>
+                  <label>{t('breakEnd', locale)}</label>
                   <select
                     value={dayData.breakEnd}
                     onChange={(e) => handleTimeChange(selectedDay, 'breakEnd', e.target.value)}
                   >
                     {timeSlots.map(slot => (
-                      <option key={slot} value={slot}>{slot}</option>
+                      <option key={slot} value={slot}>{t(slot, locale)}</option>
                     ))}
                   </select>
                 </div>
@@ -220,9 +219,9 @@ export default function AvailabilityPage() {
             </div>
 
             <div className="time-slots-section">
-              <h3>Available Time Slots</h3>
+              <h3>{t('availableTimeSlots', locale)}</h3>
               <p className="section-description">
-                Select the specific time slots you want to be available for bookings
+                {t('selectTimeSlots', locale)}
               </p>
               <div className="time-slots-grid">
                 {timeSlots.map(slot => {
@@ -237,7 +236,7 @@ export default function AvailabilityPage() {
                       onClick={() => isInRange && !isBreakTime && handleSlotToggle(selectedDay, slot)}
                       disabled={!isInRange || isBreakTime}
                     >
-                      {slot}
+                      {t(slot, locale)}
                     </button>
                   );
                 })}
@@ -248,7 +247,7 @@ export default function AvailabilityPage() {
 
         {!dayData.isAvailable && (
           <div className="unavailable-message">
-            <p>You are not available on {daysOfWeek.find(d => d.key === selectedDay)?.label}</p>
+            <p>{t('unavailableMessage', locale, { day: daysOfWeek.find(d => d.key === selectedDay)?.label })}</p>
           </div>
         )}
       </div>
@@ -267,7 +266,7 @@ export default function AvailabilityPage() {
       <div className="availability-page">
         <div className="loading-spinner">
           <div className="spinner"></div>
-          <p>Loading your availability...</p>
+          <p>{t('loading', locale)}</p>
         </div>
       </div>
     );
@@ -276,11 +275,11 @@ export default function AvailabilityPage() {
   return (
     <div className="availability-page">
       <div className="availability-header">
-        <button className="back-button" onClick={() => navigate('/provider')}>
-          ← Back to Dashboard
-        </button>
-        <h1>Manage Your Availability</h1>
-        <p>Set your working hours and available time slots for each day</p>
+        <div className="header-content">
+          <h1>{t('manageAvailability', locale)}</h1>
+          <p>{t('setWorkingHours', locale)}</p>
+          {name && <p className="user-greeting">Welcome, {name}!</p>}
+        </div>
       </div>
 
       <div className="availability-container">
@@ -296,14 +295,14 @@ export default function AvailabilityPage() {
             onClick={handleSaveAvailability}
             disabled={isSaving}
           >
-            {isSaving ? 'Saving...' : 'Save Availability'}
+            {isSaving ? t('saving', locale) : t('saveAvailability', locale)}
           </button>
           <button
             className="cancel-button"
             onClick={() => navigate('/provider')}
             disabled={isSaving}
           >
-            Cancel
+            {t('cancel', locale)}
           </button>
         </div>
       </div>

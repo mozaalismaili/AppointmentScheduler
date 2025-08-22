@@ -1,6 +1,6 @@
 .dashboard-container {
   min-height: 100vh;
-  background: #f8fafc;
+  background: var(--bg-secondary);
   padding: 24px;
 }
 
@@ -10,24 +10,24 @@
   align-items: center;
   margin-bottom: 32px;
   padding: 32px;
-  background: white;
+  background: var(--bg-primary);
   border-radius: 16px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow);
 }
 
 .welcome-section h1 {
   font-size: 2.5rem;
   font-weight: 700;
-  color: #1a202c;
+  color: var(--text-primary);
   margin: 0 0 8px 0;
-  background: linear-gradient(135deg, #7db6ad, #8b55bd);
+  background: linear-gradient(135deg, var(--accent-color), #8b55bd);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
 .welcome-section p {
-  color: #718096;
+  color: var(--text-secondary);
   font-size: 1.1rem;
   margin: 0;
 }
@@ -60,14 +60,14 @@
 }
 
 .view-bookings-btn {
-  background: #e2e8f0;
-  color: #4a5568;
-  border: 2px solid #cbd5e0;
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  border: 2px solid var(--border-color);
 }
 
 .view-bookings-btn:hover {
-  background: #cbd5e0;
-  border-color: #a0aec0;
+  background: var(--bg-tertiary);
+  border-color: var(--accent-color);
 }
 
 .dashboard-stats {
@@ -78,11 +78,11 @@
 }
 
 .stat-card {
-  background: white;
+  background: var(--bg-primary);
   padding: 24px;
   border-radius: 16px;
   text-align: center;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow);
   transition: transform 0.3s ease;
 }
 
@@ -93,27 +93,27 @@
 .stat-number {
   font-size: 3rem;
   font-weight: 700;
-  color: #7db6ad;
+  color: var(--accent-color);
   margin-bottom: 8px;
 }
 
 .stat-label {
-  color: #718096;
+  color: var(--text-secondary);
   font-size: 1rem;
   font-weight: 500;
 }
 
 .dashboard-content {
-  background: white;
+  background: var(--bg-primary);
   border-radius: 16px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow);
   overflow: hidden;
 }
 
 .tab-navigation {
   display: flex;
-  background: #f7fafc;
-  border-bottom: 1px solid #e2e8f0;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
 }
 
 .tab-button {
@@ -123,20 +123,20 @@
   border: none;
   font-size: 1rem;
   font-weight: 600;
-  color: #718096;
+  color: var(--text-secondary);
   cursor: pointer;
   transition: all 0.3s ease;
   position: relative;
 }
 
 .tab-button:hover {
-  background: #edf2f7;
-  color: #4a5568;
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
 }
 
 .tab-button.active {
-  color: #7db6ad;
-  background: white;
+  color: var(--accent-color);
+  background: var(--bg-primary);
 }
 
 .tab-button.active::after {
@@ -146,7 +146,7 @@
   left: 0;
   right: 0;
   height: 3px;
-  background: linear-gradient(135deg, #7db6ad, #8b55bd);
+  background: linear-gradient(135deg, var(--accent-color), #8b55bd);
 }
 
 .tab-content {
@@ -160,7 +160,7 @@
 }
 
 .overview-section h2 {
-  color: #2d3748;
+  color: var(--text-primary);
   font-size: 1.5rem;
   font-weight: 600;
   margin: 0 0 20px 0;
@@ -172,17 +172,17 @@
 }
 
 .booking-card {
-  background: #f8fafc;
+  background: var(--bg-secondary);
   border-radius: 12px;
   padding: 20px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border-color);
   transition: all 0.3s ease;
 }
 
 .booking-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-  border-color: #7db6ad;
+  box-shadow: var(--shadow-hover);
+  border-color: var(--accent-color);
 }
 
 .booking-header {
@@ -195,7 +195,7 @@
 .customer-name {
   font-size: 1.25rem;
   font-weight: 600;
-  color: #2d3748;
+  color: var(--text-primary);
   margin: 0;
 }
 
@@ -242,18 +242,18 @@
 
 .detail-label {
   font-weight: 600;
-  color: #4a5568;
+  color: var(--text-secondary);
 }
 
 .detail-value {
-  color: #2d3748;
+  color: var(--text-primary);
 }
 
 .booking-actions {
   display: flex;
   gap: 12px;
   padding-top: 16px;
-  border-top: 1px solid #e2e8f0;
+  border-top: 1px solid var(--border-color);
 }
 
 .action-button {
@@ -293,9 +293,9 @@
 }
 
 .quick-action-btn {
-  background: #f7fafc;
-  border: 2px solid #e2e8f0;
-  color: #4a5568;
+  background: var(--bg-secondary);
+  border: 2px solid var(--border-color);
+  color: var(--text-secondary);
   padding: 16px 24px;
   border-radius: 12px;
   font-size: 1rem;
