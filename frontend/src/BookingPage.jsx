@@ -3,6 +3,8 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import "./BookingPage.css";
+// [notifications]
+import { useNotifications } from './components/ui/notifications/useNotifications';
 
 // --- Schema ---
 const phoneRegex = /^(\+?\d[\d\s-]{7,15})$/;
@@ -63,6 +65,8 @@ export default function BookingPage({ services = ["Consultation", "Follow-up", "
   const minDate = toLocalMinDateStr();
   const resolvedApi = useMemo(() => getApiBaseUrl(apiBaseUrl), [apiBaseUrl]);
   const [banner, setBanner] = useState({ kind: "success", text: "" });
+  // [notifications]
+  const { notify } = useNotifications();
 
   const { register, handleSubmit, watch, reset, formState: { errors, isSubmitting } } = useForm({
     resolver: zodResolver(BookingSchema),
@@ -98,8 +102,12 @@ export default function BookingPage({ services = ["Consultation", "Follow-up", "
       const data = await createBooking(resolvedApi, payload, idKey);
       reset();
       setBanner({ kind: "success", text: data?.message || "✅ Booking created! We’ll contact you soon." });
+      // [notifications]
+      notify({ variant: 'success', message: data?.message || 'Booking created successfully' });
     } catch (err) {
       setBanner({ kind: "error", text: err.message || "Could not submit. Try again." });
+      // [notifications]
+      notify({ variant: 'error', message: err.message || 'Submission failed' });
     }
   }
 
