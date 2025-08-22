@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
+import com.rihal.AppointmentScheduler.config.AppointmentConfig;
 import com.rihal.AppointmentScheduler.model.Appointment;
 import com.rihal.AppointmentScheduler.model.Availability;
 import com.rihal.AppointmentScheduler.repository.AppointmentRepository;
@@ -21,28 +22,41 @@ public class SlotService {
 
     private final AvailabilityRepository availabilityRepository;
     private final AppointmentRepository appointmentRepository;
+    private final AppointmentConfig config;
 
-    private static final Duration STEP = Duration.ofMinutes(30);
+    private static final Duration STEP_DEFAULT = Duration.ofMinutes(30);
 
     public SlotService(AvailabilityRepository availabilityRepository,
-                       AppointmentRepository appointmentRepository) {
+                       AppointmentRepository appointmentRepository,
+                       AppointmentConfig config) {
         this.availabilityRepository = availabilityRepository;
         this.appointmentRepository = appointmentRepository;
+        this.config = config;
     }
 
     public List<LocalTime> getSlots(UUID providerId, LocalDate date) {
-        // Convert UUID to Long for Availability queries
-        // This is a temporary workaround for the type mismatch
-        Long providerLong = Long.parseLong(providerId.toString().replace("-", "").substring(0, 16), 16);
+        // For now, use the default provider since we're in single-provider MVP mode
+        // In the future, this should map UUID to actual User ID
+        Long providerLong = config.getDefaultProviderNumericId();
+        
         List<Availability> availabilities = availabilityRepository
                 .findByProviderIdAndDayOfWeek(providerLong, date.getDayOfWeek());
 
-        if (availabilities.isEmpty()) return List.of();
+        if (availabilities.isEmpty()) {
+            // If no availability is set, return default business hours for demonstration
+            // This allows customers to see time slots even before providers set their availability
+            return getDefaultSlots(date);
+        }
 
-        // Get the first availability for the day (assuming one per day)
         Availability availability = availabilities.get(0);
 
-        List<LocalTime> allSlots = enumerate(availability.getStartTime(), availability.getEndTime(), STEP);
+        Duration step = Duration.ofMinutes(
+                availability.getSlotDurationMinutes() != null ? availability.getSlotDurationMinutes() : (int) STEP_DEFAULT.toMinutes()
+        );
+
+        List<LocalTime> allSlots = enumerate(availability.getStartTime(), availability.getEndTime(), step);
+
+        // Use the provided providerId for appointment lookup
         List<Appointment> booked = appointmentRepository
                 .findByProviderIdAndDateAndStatus(providerId, date, Appointment.Status.BOOKED);
 
@@ -59,5 +73,19 @@ public class SlotService {
             times.add(t);
         }
         return times;
+    }
+
+    private List<LocalTime> getDefaultSlots(LocalDate date) {
+        // Return default business hours: 9 AM to 5 PM with 30-minute slots
+        // Only for weekdays (Monday to Friday)
+        if (date.getDayOfWeek().getValue() > 5) { // Saturday = 6, Sunday = 7
+            return List.of(); // No slots on weekends
+        }
+        
+        LocalTime startTime = LocalTime.of(9, 0); // 9:00 AM
+        LocalTime endTime = LocalTime.of(17, 0);  // 5:00 PM
+        Duration step = Duration.ofMinutes(30);
+        
+        return enumerate(startTime, endTime, step);
     }
 }

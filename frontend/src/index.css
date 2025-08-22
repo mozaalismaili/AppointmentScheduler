@@ -24,8 +24,7 @@ a:hover {
 
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
+  display: block;
   min-width: 320px;
   min-height: 100vh;
 }
@@ -66,3 +65,7 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+
+/* Basic app shell for navbar + routed content */
+#app-shell { display: flex; flex-direction: column; min-height: 100vh; }
+main.app-main { flex: 1; }

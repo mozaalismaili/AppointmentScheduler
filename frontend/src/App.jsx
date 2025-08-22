@@ -1,32 +1,75 @@
-// src/App.jsx
 import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
+import { useSelector } from "react-redux";
+import Navbar from "./components/Navbar";
+import ProtectedRoute from "./components/ProtectedRoute";
 
-import Login from "./Login";
-import BookingPage from "./BookingPage";
-import AvailabilityPage from "./AvailabilityPage";
-import CustomerDashboard from "./CustomerDashboard";
-import ProviderDashboard from "./ProviderDashboard";
+import AuthForm from "./components/auth/AuthForm";
+import CustomerDashboard from "./components/dashboard/CustomerDashboard";
+import ProviderDashboard from "./components/dashboard/ProviderDashboard";
+import BookingPage from "./pages/BookingPage";
+import AvailabilityPage from "./pages/AvailabilityPage";
 
 export default function App() {
   return (
-    <Routes>
-      {/* Default → login */}
-      <Route path="/" element={<Navigate to="/login" replace />} />
+    <>
+      <Navbar />
+      <Routes>
+        <Route path="/" element={<LandingRedirect />} />
+        <Route path="/auth" element={<AuthForm />} />
+        <Route path="/login" element={<Navigate to="/auth" replace />} />
+        <Route path="/signup" element={<Navigate to="/auth" replace />} />
 
-      {/* Auth */}
-      <Route path="/login" element={<Login />} />
+        <Route
+          path="/customer"
+          element={
+            <ProtectedRoute allowRoles={["customer"]}>
+              <CustomerDashboard />
+            </ProtectedRoute>
+          }
+        />
+        
+        <Route
+          path="/book"
+          element={
+            <ProtectedRoute allowRoles={["customer"]}>
+              <BookingPage />
+            </ProtectedRoute>
+          }
+        />
 
-      {/* Customer */}
-      <Route path="/customer" element={<CustomerDashboard />} />
-      <Route path="/book" element={<BookingPage />} />
+        <Route
+          path="/provider"
+          element={
+            <ProtectedRoute allowRoles={["provider", "admin"]}>
+              <ProviderDashboard />
+            </ProtectedRoute>
+          }
+        />
+        
+        <Route
+          path="/availability"
+          element={
+            <ProtectedRoute allowRoles={["provider", "admin"]}>
+              <AvailabilityPage />
+            </ProtectedRoute>
+          }
+        />
 
-      {/* Provider */}
-      <Route path="/provider" element={<ProviderDashboard />} />
-      <Route path="/availability" element={<AvailabilityPage />} />
-
-      {/* Fallback */}
-      <Route path="*" element={<Navigate to="/login" replace />} />
-    </Routes>
+        <Route path="*" element={<Navigate to="/auth" replace />} />
+      </Routes>
+    </>
   );
+}
+
+function LandingRedirect() {
+  const { role } = useSelector((s) => s.auth);
+  
+  if (role === "provider" || role === "admin") {
+    return <Navigate to="/provider" replace />;
+  }
+  if (role === "customer") {
+    return <Navigate to="/customer" replace />;
+  }
+  return <Navigate to="/auth" replace />;
 }

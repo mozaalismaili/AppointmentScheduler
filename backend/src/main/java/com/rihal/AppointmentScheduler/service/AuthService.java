@@ -33,12 +33,13 @@ public class AuthService {
         // Hash the password before saving
         String encodedPassword = passwordEncoder.encode(request.getPassword());
         
-        // Create user entity
+        // Create user entity (role mapping is case-insensitive)
+        String roleName = request.getRole() == null ? "CUSTOMER" : request.getRole().trim().toUpperCase();
         User user = new User(
             request.getEmail(),
             encodedPassword,
             request.getName(),
-            User.Role.valueOf(request.getRole()),
+            User.Role.valueOf(roleName),
             request.getPhone()
         );
 

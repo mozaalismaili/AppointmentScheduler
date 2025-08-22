@@ -94,4 +94,7 @@ public class Availability {
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+
+    // Helper method to get provider ID
+    public Long getProviderId() { return provider != null ? provider.getId() : null; }
 }

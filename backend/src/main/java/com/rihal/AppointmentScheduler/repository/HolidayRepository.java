@@ -11,9 +11,11 @@ import java.util.List;
 @Repository
 public interface HolidayRepository extends JpaRepository<Holiday, Long> {
 
-    List<Holiday> findByProviderId(Long providerId);
+    @Query("SELECT h FROM Holiday h WHERE h.provider.id = :providerId")
+    List<Holiday> findByProviderId(@Param("providerId") Long providerId);
 
-    List<Holiday> findByProviderIdAndDate(Long providerId, LocalDate date);
+    @Query("SELECT h FROM Holiday h WHERE h.provider.id = :providerId AND h.date = :date")
+    List<Holiday> findByProviderIdAndDate(@Param("providerId") Long providerId, @Param("date") LocalDate date);
 
     @Query("SELECT h FROM Holiday h WHERE h.provider.id = :providerId AND h.date BETWEEN :startDate AND :endDate ORDER BY h.date")
     List<Holiday> findByProviderIdAndDateRange(@Param("providerId") Long providerId,
@@ -24,5 +26,6 @@ public interface HolidayRepository extends JpaRepository<Holiday, Long> {
     List<Holiday> findUpcomingHolidaysByProvider(@Param("providerId") Long providerId,
                                                  @Param("currentDate") LocalDate currentDate);
 
-    boolean existsByProviderIdAndDate(Long providerId, LocalDate date);
+    @Query("SELECT CASE WHEN COUNT(h) > 0 THEN true ELSE false END FROM Holiday h WHERE h.provider.id = :providerId AND h.date = :date")
+    boolean existsByProviderIdAndDate(@Param("providerId") Long providerId, @Param("date") LocalDate date);
 }

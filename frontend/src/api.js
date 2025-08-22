@@ -13,30 +13,18 @@ export function getBase() {
 export async function fetchAppointments(rangeStart, rangeEnd){
   const base = getBase();
   const from = toISODate(rangeStart), to = toISODate(rangeEnd);
-  try{
-    const res = await fetch(`${base}/appointments?from=${from}&to=${to}`, { credentials:"include" });
-    if(!res.ok) throw new Error();
-    const data = await res.json();
-    return data.map(a => ({
-      id: a.id,
-      title: a.customerName || a.title || "Appointment",
-      date: a.date,                       // YYYY-MM-DD
-      start: a.start_time || a.start,     // HH:mm
-      end:   a.end_time   || a.end,       // HH:mm
-      status: a.status || "booked",
-      notes: a.notes || ""
-    }));
-  }catch{
-    // Fallback so UI works without backend
-    const today = new Date();
-    const pad = n => String(n).padStart(2,"0");
-    const d = off => { const t=new Date(today); t.setDate(t.getDate()+off); return `${t.getFullYear()}-${pad(t.getMonth()+1)}-${pad(t.getDate())}`; };
-    return [
-      { id:"E-1", title:"John Smith",  date:d(0), start:"09:00", end:"09:30", status:"booked" },
-      { id:"E-2", title:"Aisha Noor",  date:d(1), start:"11:30", end:"12:00", status:"booked" },
-      { id:"E-3", title:"Follow-up",   date:d(2), start:"15:00", end:"15:30", status:"booked" },
-    ];
-  }
+  const res = await fetch(`${base}/appointments?from=${from}&to=${to}`, { credentials:"include" });
+  if(!res.ok) throw new Error(await res.text());
+  const data = await res.json();
+  return data.map(a => ({
+    id: a.id,
+    title: a.customerName || a.title || "Appointment",
+    date: a.date,
+    start: a.start_time || a.start,
+    end:   a.end_time   || a.end,
+    status: a.status || "booked",
+    notes: a.notes || ""
+  }));
 }
 
 /* ---------- Customer dashboard ---------- */
@@ -68,7 +56,7 @@ export async function getAvailability(date){
   const base = getBase();
   const r = await fetch(`${base}/availability?date=${toISODate(date)}`, { credentials:"include" });
   if(!r.ok) throw new Error("Failed to load availability");
-  return r.json(); // component normalizes any shape
+  return r.json();
 }
 export async function createBooking(payload){
   const base = getBase();

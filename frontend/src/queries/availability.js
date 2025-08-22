@@ -4,13 +4,20 @@ import { endpoints } from "../api/endpoints";
 
 export const availabilityKey = (date) => ["availability", date];
 
-export function useAvailability(date) {
+export function useAvailability(providerId, date) {
   return useQuery({
-    queryKey: availabilityKey(date),
+    queryKey: availabilityKey(`${providerId}-${date}`),
     queryFn: async () => {
-      const { data } = await api.get(endpoints.getAvailability, { params: { date } });
+      // Prefer slots endpoint if date is given
+      if (date) {
+        const { data } = await api.get(endpoints.slots, { params: { providerId, date } });
+        // Backend returns just a list of LocalTime strings
+        return data || [];
+      }
+      const { data } = await api.get(endpoints.availabilityByProvider(providerId), { params: { activeOnly: true } });
       return data;
     },
+    enabled: !!providerId,
     staleTime: 60_000,
   });
 }
@@ -19,7 +26,7 @@ export function useBookAppointment() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (payload) => {
-      const { data } = await api.post(endpoints.book, payload);
+      const { data } = await api.post(endpoints.createAppointment, payload);
       return data;
     },
     onSuccess: (_res, vars) => {

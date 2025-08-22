@@ -6,8 +6,12 @@ import com.rihal.AppointmentScheduler.repository.UserRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/users")
+@CrossOrigin(origins = "*")
 public class UserController {
 
     private final UserRepository userRepository;
@@ -19,15 +23,18 @@ public class UserController {
     @PostMapping
     public ResponseEntity<?> createUser(@RequestBody UserDTO request) {
         if (userRepository.existsByEmail(request.getEmail())) {
-            return ResponseEntity.badRequest().body("Email already exists");
+            Map<String, String> errorMap = new HashMap<>();
+            errorMap.put("error", "Email already exists");
+            return ResponseEntity.badRequest().body(errorMap);
         }
 
         // Map DTO to entity
+        String roleName = request.getRole() == null ? "CUSTOMER" : request.getRole().trim().toUpperCase();
         User user = new User(
                 request.getEmail(),
                 request.getPassword(), // For now plain; should hash before storing
                 request.getName(),
-                User.Role.valueOf(request.getRole()),
+                User.Role.valueOf(roleName),
                 request.getPhone()
         );
 
