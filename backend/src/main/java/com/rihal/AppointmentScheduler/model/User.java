@@ -1,9 +1,20 @@
 package com.rihal.AppointmentScheduler.model;
 
-import jakarta.persistence.*;
-import jakarta.validation.constraints.*;
 import java.time.LocalDateTime;
 import java.util.List;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 
 @Entity
 @Table(name = "users")
@@ -37,6 +48,9 @@ public class User {
 
     @OneToMany(mappedBy = "provider", cascade = CascadeType.ALL)
     private List<Holiday> holidays;
+
+    @OneToMany(mappedBy = "provider", cascade = CascadeType.ALL)
+    private List<ServiceModel> services;
 
     public enum Role {
         CUSTOMER, PROVIDER, ADMIN
@@ -114,5 +128,12 @@ public class User {
     }
     public void setHolidays(List<Holiday> holidays) {
         this.holidays = holidays;
+    }
+    
+    public List<ServiceModel> getServices() {
+        return services;
+    }
+    public void setServices(List<ServiceModel> services) {
+        this.services = services;
     }
 }

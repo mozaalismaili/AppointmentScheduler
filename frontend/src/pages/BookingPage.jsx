@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { useTheme } from '../context/ThemeContext';
 import { useLocale } from '../context/LocaleContext';
+import { useTheme } from '../context/ThemeContext';
 import { t } from '../locales/translations';
 import './BookingPage.css';
 
@@ -19,18 +19,12 @@ export default function BookingPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [step, setStep] = useState(1);
 
-  const [services] = useState([
-    { id: 1, name: t('hairCut', locale), duration: 30, price: 25 },
-    { id: 2, name: t('manicure', locale), duration: 45, price: 35 },
-    { id: 3, name: t('pedicure', locale), duration: 60, price: 45 },
-    { id: 4, name: t('hairColoring', locale), duration: 120, price: 80 }
-  ]);
+  const [services, setServices] = useState([]);
+  const [providers, setProviders] = useState([]);
 
-  const [providers] = useState([
-    { id: 1, name: 'John Doe', specialty: t('hairStyling', locale), rating: 4.8 },
-    { id: 2, name: 'Jane Smith', specialty: t('nailCare', locale), rating: 4.9 },
-    { id: 3, name: 'Mike Johnson', specialty: t('hairColoring', locale), rating: 4.7 }
-  ]);
+  useEffect(() => {
+    fetchServicesAndProviders();
+  }, []);
 
   useEffect(() => {
     if (selectedService && selectedProvider && selectedDate) {
@@ -38,22 +32,58 @@ export default function BookingPage() {
     }
   }, [selectedService, selectedProvider, selectedDate]);
 
+  const fetchServicesAndProviders = async () => {
+    try {
+      setIsLoading(true);
+
+      // Fetch services from backend
+      const servicesResponse = await fetch('/api/services');
+      if (servicesResponse.ok) {
+        const servicesData = await servicesResponse.json();
+        setServices(servicesData);
+      } else {
+        console.error('Failed to fetch services');
+        setServices([]);
+      }
+
+      // TODO: Replace with actual providers API call when backend endpoint is ready
+      // For now, show empty array until backend endpoints are implemented
+      setProviders([]);
+
+      setIsLoading(false);
+    } catch (error) {
+      console.error('Error fetching services and providers:', error);
+      setServices([]);
+      setProviders([]);
+      setIsLoading(false);
+    }
+  };
+
   const fetchAvailableSlots = async () => {
     try {
       setIsLoading(true);
-      // TODO: Replace with actual API call
-      // const response = await getAvailableSlots(selectedProvider, selectedDate);
-      // setAvailableSlots(response.data);
-      
-      // Mock data for now
-      setTimeout(() => {
-        setAvailableSlots([
-          '9:00 AM', '10:00 AM', '11:00 AM', '2:00 PM', '3:00 PM', '4:00 PM'
-        ]);
-        setIsLoading(false);
-      }, 1000);
+
+      // Fetch available slots from backend
+      const dateParam = encodeURIComponent(selectedDate);
+      const providerId = selectedProvider.id || 1; // Fallback to 1 if no ID
+      const serviceDuration = selectedService.durationMinutes || 30;
+
+      const response = await fetch(
+        `/api/timeslots/available?date=${dateParam}&providerId=${providerId}&serviceDurationMinutes=${serviceDuration}`
+      );
+
+      if (response.ok) {
+        const slotsData = await response.json();
+        setAvailableSlots(slotsData);
+      } else {
+        console.error('Failed to fetch available slots');
+        setAvailableSlots([]);
+      }
+
+      setIsLoading(false);
     } catch (error) {
       console.error('Error fetching available slots:', error);
+      setAvailableSlots([]);
       setIsLoading(false);
     }
   };
@@ -81,20 +111,19 @@ export default function BookingPage() {
   const handleBooking = async () => {
     try {
       setIsLoading(true);
-      // TODO: Replace with actual API call
-      // const response = await bookAppointment({
+
+      // TODO: Replace with actual API call when backend endpoint is ready
+      // const response = await createBooking({
       //   service: selectedService,
       //   provider: selectedProvider,
       //   date: selectedDate,
       //   time: selectedTime
       // });
-      
-             // Mock success
-       setTimeout(() => {
-         alert(t('appointmentBooked', locale));
-         navigate('/customer');
-         setIsLoading(false);
-       }, 1000);
+
+      // For now, show success message and redirect
+      alert(t('appointmentBooked', locale));
+      navigate('/customer');
+      setIsLoading(false);
     } catch (error) {
       console.error('Error booking appointment:', error);
       setIsLoading(false);
@@ -123,41 +152,55 @@ export default function BookingPage() {
   const renderServiceSelection = () => (
     <div className="step-content">
       <h2>{t('whatService', locale)}</h2>
-      <div className="services-grid">
-        {services.map(service => (
-          <div
-            key={service.id}
-            className="service-card"
-            onClick={() => handleServiceSelect(service)}
-          >
-            <h3>{service.name}</h3>
-            <p className="service-duration">{service.duration} {t('minutes', locale)}</p>
-            <p className="service-price">${service.price}</p>
-          </div>
-        ))}
-      </div>
+      {services.length > 0 ? (
+        <div className="services-grid">
+          {services.map(service => (
+            <div
+              key={service.id}
+              className="service-card"
+              onClick={() => handleServiceSelect(service)}
+            >
+              <h3>{service.name}</h3>
+              <p className="service-duration">{service.durationMinutes} {t('minutes', locale)}</p>
+              <p className="service-price">${service.price}</p>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="empty-services">
+          <p>{t('noServicesAvailable', locale)}</p>
+          <p className="empty-services-subtitle">{t('contactProvider', locale)}</p>
+        </div>
+      )}
     </div>
   );
 
   const renderProviderSelection = () => (
     <div className="step-content">
       <h2>{t('whoBookWith', locale)}</h2>
-      <div className="providers-grid">
-        {providers.map(provider => (
-          <div
-            key={provider.id}
-            className="provider-card"
-            onClick={() => handleProviderSelect(provider)}
-          >
-            <h3>{provider.name}</h3>
-            <p className="provider-specialty">{t('specialty', locale)}: {provider.specialty}</p>
-            <div className="provider-rating">
-              <span className="stars">★★★★★</span>
-              <span className="rating-text">{t('rating', locale)}: {provider.rating}</span>
+      {providers.length > 0 ? (
+        <div className="providers-grid">
+          {providers.map(provider => (
+            <div
+              key={provider.id}
+              className="provider-card"
+              onClick={() => handleProviderSelect(provider)}
+            >
+              <h3>{provider.name}</h3>
+              <p className="provider-specialty">{t('specialty', locale)}: {provider.specialty}</p>
+              <div className="provider-rating">
+                <span className="stars">★★★★★</span>
+                <span className="rating-text">{t('rating', locale)}: {provider.rating}</span>
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      ) : (
+        <div className="empty-providers">
+          <p>{t('noProvidersAvailable', locale)}</p>
+          <p className="empty-providers-subtitle">{t('contactAdmin', locale)}</p>
+        </div>
+      )}
     </div>
   );
 
@@ -225,7 +268,7 @@ export default function BookingPage() {
           <span className="summary-value">${selectedService.price}</span>
         </div>
       </div>
-      
+
       <button
         className="confirm-booking-btn"
         onClick={handleBooking}
@@ -249,10 +292,10 @@ export default function BookingPage() {
 
   return (
     <div className="booking-page">
-             <div className="booking-header">
-         <button className="back-button" onClick={goBack}>
-           ← {t('back', locale)}
-         </button>
+      <div className="booking-header">
+        <button className="back-button" onClick={goBack}>
+          ← {t('back', locale)}
+        </button>
         <h1>{getCurrentStepTitle()}</h1>
         <div className="progress-bar">
           {[1, 2, 3, 4, 5].map(stepNumber => (

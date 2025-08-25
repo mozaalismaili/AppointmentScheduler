@@ -1,0 +1,69 @@
+version: "3.8"
+
+services:
+  app:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      # Database Configuration
+      - DB_HOST=db
+      - DB_PORT=3306
+      - DB_NAME=your_database_name
+      - DB_USERNAME=your_username
+      - DB_PASSWORD=your_password
+
+      # Database Connection Pool Configuration
+      - DB_MAX_POOL_SIZE=10
+      - DB_MIN_IDLE=5
+      - DB_CONNECTION_TIMEOUT=30000
+      - DB_IDLE_TIMEOUT=600000
+      - DB_MAX_LIFETIME=1800000
+
+      # JWT Configuration
+      - JWT_SECRET=your_jwt_secret_key_here_make_it_long_and_random
+      - JWT_EXPIRATION=86400000
+      - JWT_HEADER=Authorization
+      - JWT_PREFIX=Bearer
+
+      # Appointment Configuration
+      - APPOINTMENT_CANCELLATION_LIMIT_HOURS=24
+      - APPOINTMENT_GRACE_PERIOD_MINUTES=15
+      - APPOINTMENT_ALLOW_PAST_CANCELLATIONS=false
+      - APPOINTMENT_DEFAULT_SLOT_MINUTES=30
+      - APPOINTMENT_DEFAULT_PROVIDER_NUMERIC_ID=1
+
+      # Server Configuration
+      - SERVER_PORT=8080
+
+      # Logging Configuration
+      - LOGGING_LEVEL_SPRING=INFO
+      - LOGGING_LEVEL_APP=INFO
+    depends_on:
+      - db
+    restart: unless-stopped
+    volumes:
+      - ./logs:/app/logs
+    networks:
+      - app-network
+
+  db:
+    image: mysql:8.0
+    environment:
+      - MYSQL_ROOT_PASSWORD=your_root_password
+      - MYSQL_DATABASE=your_database_name
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    restart: unless-stopped
+    command: --default-authentication-plugin=mysql_native_password
+    networks:
+      - app-network
+
+volumes:
+  mysql_data:
+
+networks:
+  app-network:
+    driver: bridge

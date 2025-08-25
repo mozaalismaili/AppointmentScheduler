@@ -5,6 +5,7 @@ import { logout } from "../features/auth/authSlice";
 import { useTheme } from "../context/ThemeContext";
 import { useLocale } from "../context/LocaleContext";
 import { t } from "../locales/translations";
+import NotificationBell from "./NotificationBell";
 import "./Navbar.css";
 
 export default function Navbar() {
@@ -89,6 +90,9 @@ export default function Navbar() {
               <option value="en">{t('english', locale)}</option>
               <option value="ar">{t('arabic', locale)}</option>
             </select>
+
+            {/* Notification Bell - Only show for authenticated users */}
+            {role && <NotificationBell />}
           </div>
 
           {/* User Section */}

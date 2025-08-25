@@ -165,13 +165,24 @@ export const translations = {
     // Back Button
     back: 'Back',
     
-    // Mock Data (Service Names)
-    hairCut: 'Hair Cut',
-    manicure: 'Manicure',
-    pedicure: 'Pedicure',
-    hairColoring: 'Hair Coloring',
-    hairStyling: 'Hair Styling',
-    nailCare: 'Nail Care',
+         // Service Names (Generic - will be replaced by provider's actual services)
+     hairCut: 'Hair Cut',
+     manicure: 'Manicure',
+     pedicure: 'Pedicure',
+     hairColoring: 'Hair Coloring',
+     hairStyling: 'Hair Styling',
+     nailCare: 'Nail Care',
+     
+     // Dynamic Service Messages
+     noServicesAvailable: 'No services available at the moment',
+     contactProvider: 'Please contact the service provider to set up services',
+     noProvidersAvailable: 'No service providers available',
+     contactAdmin: 'Please contact the administrator',
+     
+     // Appointment Duration
+     appointmentDuration: 'Appointment Duration',
+     durationPerAppointment: 'Duration per appointment',
+     minutes: 'minutes',
     
     // Auth Form
     welcomeBack: 'Welcome Back',
@@ -344,13 +355,24 @@ export const translations = {
     // Back Button
     back: 'رجوع',
     
-    // Mock Data (Service Names)
-    hairCut: 'قص الشعر',
-    manicure: 'مانيكير',
-    pedicure: 'بديكير',
-    hairColoring: 'صبغ الشعر',
-    hairStyling: 'تسريح الشعر',
-    nailCare: 'العناية بالأظافر',
+         // Service Names (Generic - will be replaced by provider's actual services)
+     hairCut: 'قص الشعر',
+     manicure: 'مانيكير',
+     pedicure: 'بديكير',
+     hairColoring: 'صبغ الشعر',
+     hairStyling: 'تسريح الشعر',
+     nailCare: 'العناية بالأظافر',
+     
+     // Dynamic Service Messages
+     noServicesAvailable: 'لا توجد خدمات متاحة في الوقت الحالي',
+     contactProvider: 'يرجى الاتصال بمقدم الخدمة لإعداد الخدمات',
+     noProvidersAvailable: 'لا يوجد مقدمي خدمات متاحين',
+     contactAdmin: 'يرجى الاتصال بالمدير',
+     
+     // Appointment Duration
+     appointmentDuration: 'مدة الموعد',
+     durationPerAppointment: 'مدة كل موعد',
+     minutes: 'دقائق',
     
     // Auth Form
     welcomeBack: 'مرحباً بعودتك',

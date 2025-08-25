@@ -11,6 +11,23 @@ import ProviderDashboard from "./components/dashboard/ProviderDashboard";
 import BookingPage from "./pages/BookingPage";
 import AvailabilityPage from "./pages/AvailabilityPage";
 
+// LandingRedirect component defined first
+function LandingRedirect() {
+  const { role, token } = useSelector((s) => s.auth);
+  
+  if (token && role) {
+    if (role === "provider" || role === "admin") {
+      return <Navigate to="/provider" replace />;
+    }
+    if (role === "customer") {
+      return <Navigate to="/customer" replace />;
+    }
+  }
+  
+  // If no token or role, go to auth page
+  return <Navigate to="/auth" replace />;
+}
+
 export default function App() {
   const { locale } = useLocale();
   const { role, token } = useSelector((s) => s.auth);
@@ -69,20 +86,4 @@ export default function App() {
       </Routes>
     </>
   );
-}
-
-function LandingRedirect() {
-  const { role, token } = useSelector((s) => s.auth);
-  
-  if (token && role) {
-    if (role === "provider" || role === "admin") {
-      return <Navigate to="/provider" replace />;
-    }
-    if (role === "customer") {
-      return <Navigate to="/customer" replace />;
-    }
-  }
-  
-  // If no token or role, go to auth page
-  return <Navigate to="/auth" replace />;
 }

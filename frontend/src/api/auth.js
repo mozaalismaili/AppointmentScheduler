@@ -1,7 +1,7 @@
 // Production authentication API functions for Spring Boot backend
 // Backend endpoints: /api/auth/login and /api/auth/register
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080/api/auth';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
 
 /**
  * Production login function that calls the Spring Boot backend
@@ -16,7 +16,7 @@ export const loginUser = async (credentials) => {
   }
 
   try {
-    const response = await fetch(`${API_BASE_URL}/login`, {
+    const response = await fetch(`${API_BASE_URL}/auth/login`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -82,7 +82,7 @@ export const registerUser = async (userData) => {
   }
 
   try {
-    const response = await fetch(`${API_BASE_URL}/register`, {
+    const response = await fetch(`${API_BASE_URL}/auth/register`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

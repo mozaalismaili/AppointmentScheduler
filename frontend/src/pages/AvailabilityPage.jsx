@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { useLocale } from '../context/LocaleContext';
@@ -9,11 +9,12 @@ export default function AvailabilityPage() {
   const { name } = useSelector(state => state.auth);
   const navigate = useNavigate();
   const { locale } = useLocale();
-  
+
   const [availability, setAvailability] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [selectedDay, setSelectedDay] = useState('monday');
+  const [appointmentDuration, setAppointmentDuration] = useState(30); // Default 30 minutes
 
   const daysOfWeek = [
     { key: 'monday', label: t('monday', locale) },
@@ -32,6 +33,8 @@ export default function AvailabilityPage() {
     '5:00 PM', '5:30 PM', '6:00 PM', '6:30 PM', '7:00 PM', '7:30 PM'
   ];
 
+  const durationOptions = [15, 30, 45, 60, 90, 120]; // Minutes
+
   useEffect(() => {
     fetchAvailability();
   }, []);
@@ -42,7 +45,7 @@ export default function AvailabilityPage() {
       // TODO: Replace with actual API call
       // const response = await getProviderAvailability();
       // setAvailability(response.data);
-      
+
       // Initialize empty availability for now
       const emptyAvailability = {};
       daysOfWeek.forEach(day => {
@@ -89,7 +92,7 @@ export default function AvailabilityPage() {
       const newSlots = currentSlots.includes(slot)
         ? currentSlots.filter(s => s !== slot)
         : [...currentSlots, slot].sort((a, b) => timeSlots.indexOf(a) - timeSlots.indexOf(b));
-      
+
       return {
         ...prev,
         [dayKey]: {
@@ -105,10 +108,10 @@ export default function AvailabilityPage() {
       setIsSaving(true);
       // TODO: Replace with actual API call
       // await updateProviderAvailability(availability);
-      
+
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
-      
+
       alert(t('availabilityUpdated', locale));
       setIsSaving(false);
     } catch (error) {
@@ -144,7 +147,7 @@ export default function AvailabilityPage() {
 
   const renderAvailabilityForm = () => {
     const dayData = getDayAvailability(selectedDay);
-    
+
     return (
       <div className="availability-form">
         <div className="day-header">
@@ -218,6 +221,23 @@ export default function AvailabilityPage() {
               </div>
             </div>
 
+            <div className="appointment-duration-section">
+              <h3>{t('appointmentDuration', locale)}</h3>
+              <div className="duration-input">
+                <label>{t('durationPerAppointment', locale)}:</label>
+                <select
+                  value={appointmentDuration}
+                  onChange={(e) => setAppointmentDuration(parseInt(e.target.value))}
+                >
+                  {durationOptions.map(duration => (
+                    <option key={duration} value={duration}>
+                      {duration} {t('minutes', locale)}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
             <div className="time-slots-section">
               <h3>{t('availableTimeSlots', locale)}</h3>
               <p className="section-description">
@@ -228,7 +248,7 @@ export default function AvailabilityPage() {
                   const isSelected = dayData.selectedSlots.includes(slot);
                   const isInRange = isSlotInRange(slot, dayData.startTime, dayData.endTime);
                   const isBreakTime = isSlotInRange(slot, dayData.breakStart, dayData.breakEnd);
-                  
+
                   return (
                     <button
                       key={slot}
@@ -284,7 +304,7 @@ export default function AvailabilityPage() {
 
       <div className="availability-container">
         {renderDaySelector()}
-        
+
         <div className="availability-content">
           {renderAvailabilityForm()}
         </div>

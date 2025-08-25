@@ -4,7 +4,6 @@ function toISODate(d){ return typeof d === "string" ? d : d.toISOString().slice(
 export function getBase() {
   try {
     if (typeof import.meta !== "undefined" && import.meta.env?.VITE_API_BASE_URL) return import.meta.env.VITE_API_BASE_URL;
-    if (typeof process !== "undefined" && process.env?.REACT_APP_API_BASE_URL)   return process.env.REACT_APP_API_BASE_URL;
   } catch {}
   return "/api";
 }

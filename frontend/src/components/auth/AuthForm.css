@@ -76,7 +76,7 @@
   border-radius: 12px;
   font-size: 1rem;
   transition: all 0.3s ease;
-  background: #f8fafc;
+  background: white;
   color: #2d3748;
 }
 
@@ -85,16 +85,20 @@
   outline: none;
   border-color: #7db6ad;
   background: white;
+  color: #2d3748;
   box-shadow: 0 0 0 3px rgba(125, 182, 173, 0.1);
 }
 
 .form-input.error {
   border-color: #f56565;
   background: #fef5f5;
+  color: #2d3748;
 }
 
 .form-input.error:focus {
   border-color: #f56565;
+  background: #fef5f5;
+  color: #2d3748;
   box-shadow: 0 0 0 3px rgba(245, 101, 101, 0.1);
 }
 
@@ -106,6 +110,7 @@
   background-size: 16px;
   padding-right: 48px;
   appearance: none;
+  color: #2d3748;
 }
 
 .error-message {
@@ -261,4 +266,33 @@
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
+}
+
+/* Ensure input text is always visible */
+.form-input,
+.form-select {
+  color: #2d3748 !important;
+  background: white !important;
+}
+
+.form-input::placeholder,
+.form-select::placeholder {
+  color: #9ca3af !important;
+}
+
+/* Override any theme-based color inheritance */
+.form-input,
+.form-select,
+.form-input:focus,
+.form-select:focus,
+.form-input.error,
+.form-input.error:focus {
+  color: #2d3748 !important;
+}
+
+/* Force input styling regardless of theme */
+.auth-form input,
+.auth-form select {
+  color: #2d3748 !important;
+  background: white !important;
 }

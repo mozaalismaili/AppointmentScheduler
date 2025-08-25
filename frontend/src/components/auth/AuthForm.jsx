@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { setCredentials } from '../../features/auth/authSlice';
 import { loginUser, registerUser } from '../../api/auth';
 import { useLocale } from '../../context/LocaleContext';
+import { setCredentials } from '../../features/auth/authSlice';
 import { t } from '../../locales/translations';
 import './AuthForm.css';
 
@@ -43,7 +43,7 @@ export default function AuthForm() {
       ...prev,
       [name]: value
     }));
-    
+
     // Clear error when user starts typing
     if (errors[name]) {
       setErrors(prev => ({
@@ -72,7 +72,7 @@ export default function AuthForm() {
       if (!formData.name) {
         newErrors.name = 'Full name is required';
       }
-      
+
       if (formData.password !== formData.confirmPassword) {
         newErrors.confirmPassword = 'Passwords do not match';
       }
@@ -84,7 +84,7 @@ export default function AuthForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
@@ -94,7 +94,7 @@ export default function AuthForm() {
 
     try {
       let response;
-      
+
       if (isLogin) {
         response = await loginUser({
           email: formData.email,
@@ -110,7 +110,7 @@ export default function AuthForm() {
         });
       }
 
-      // Mock functions return user data directly, not wrapped in success/response object
+      // Backend returns user data directly
       const credentials = {
         token: response.token,
         role: response.role,
@@ -119,11 +119,11 @@ export default function AuthForm() {
         userId: response.id,
         basic: response.basic
       };
-      
+
       dispatch(setCredentials(credentials));
-      
+
       setMessage(isLogin ? 'Login successful!' : 'Registration successful!');
-      
+
       // Redirect will be handled automatically by useEffect when Redux state updates
     } catch (error) {
       setMessage(error.message || 'An error occurred. Please try again.');
@@ -152,8 +152,8 @@ export default function AuthForm() {
         <div className="auth-header">
           <h1 className="auth-title">{isLogin ? t('welcomeBack', locale) : t('createAccount', locale)}</h1>
           <p className="auth-subtitle">
-            {isLogin 
-              ? 'Sign in to your account to continue' 
+            {isLogin
+              ? 'Sign in to your account to continue'
               : 'Join us to start scheduling appointments'
             }
           </p>
